@@ -224,9 +224,16 @@ namespace PolkaDOTS.Configuration
             // ================== EMULATION ==================
             // Emulation type
             if (CommandLineParser.EmulationType.Value != null)
-                Config.EmulationType = (EmulationBehaviours)CommandLineParser.EmulationType.Value;
+                Config.EmulationType = (EmulationType)CommandLineParser.EmulationType.Value;
             else
                 Config.EmulationType = localArgs.EmulationType;
+            
+            // Emulation behaviour
+            if (CommandLineParser.EmulationBehaviour.Value != null)
+                Config.EmulationBehaviour = CommandLineParser.EmulationBehaviour.Value;
+            else
+                Config.EmulationBehaviour = localArgs.EmulationBehaviour;
+            
             // Emulation file path
             if (CommandLineParser.EmulationFile.Value != null)
                 Config.EmulationFilePath = CommandLineParser.EmulationFile.Value;

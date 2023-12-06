@@ -165,7 +165,7 @@ namespace PolkaDOTS.Deployment
                     }
                     
                     
-                    //cRPC.emulationBehaviours = worldConfig.emulationBehaviours;
+                    //cRPC.emulationType = worldConfig.emulationType;
                     
                     configRpcs.Add(cRPC);
                 }

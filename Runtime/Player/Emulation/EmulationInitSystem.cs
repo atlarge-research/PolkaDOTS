@@ -1,10 +1,8 @@
-﻿using System;
-using PolkaDOTS.Deployment;
+﻿using PolkaDOTS.Deployment;
 using PolkaDOTS.Multiplay;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
-using Unity.VisualScripting;
 using UnityEngine;
 
 namespace PolkaDOTS.Emulation
@@ -42,19 +40,19 @@ namespace PolkaDOTS.Emulation
             Debug.Log($"Emulation type is {emulation.emulationType}");
             
             // Multiplay guest emulation only supports input playback
-            if (Config.multiplayStreamingRoles == MultiplayStreamingRoles.Guest && (emulation.emulationType & EmulationBehaviours.Simulation) == EmulationBehaviours.Simulation)
+            if (Config.multiplayStreamingRoles == MultiplayStreamingRoles.Guest && (emulation.emulationType & EmulationType.Simulation) == EmulationType.Simulation)
             {
                 Debug.Log("Multiplay guest emulation only supports input playback, switching to it.");
-                emulation.emulationType ^= EmulationBehaviours.Simulation;
-                emulation.emulationType |= EmulationBehaviours.Playback;
+                emulation.emulationType ^= EmulationType.Simulation;
+                emulation.emulationType |= EmulationType.Playback;
             }
             
-            if((emulation.emulationType & EmulationBehaviours.Record) == EmulationBehaviours.Record)
+            if((emulation.emulationType & EmulationType.Record) == EmulationType.Record)
                 emulation.initializeRecording();
-            if((emulation.emulationType & EmulationBehaviours.Playback) == EmulationBehaviours.Playback)
+            if((emulation.emulationType & EmulationType.Playback) == EmulationType.Playback)
                 emulation.initializePlayback();
-            if ((emulation.emulationType & EmulationBehaviours.Simulation) == EmulationBehaviours.Simulation)
-                throw new NotImplementedException(); // TODO
+            if ((emulation.emulationType & EmulationType.Simulation) == EmulationType.Simulation)
+                emulation.initializeSimulation();
         }
     }
 }

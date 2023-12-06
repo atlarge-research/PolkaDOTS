@@ -5,7 +5,7 @@ namespace PolkaDOTS.Emulation
     
     [Flags]
     [Serializable]
-    public enum EmulationBehaviours :  int
+    public enum EmulationType :  int
     {
         None              = 0,
         Idle              = 0,

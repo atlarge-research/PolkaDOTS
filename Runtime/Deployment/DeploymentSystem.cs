@@ -53,11 +53,11 @@ namespace PolkaDOTS.Deployment
         // How the service names are handled when instantiating this world
         // public ServiceFilterType serviceFilterType;
         // The player emulation behaviour to use on a client world
-        //public EmulationBehaviours emulationBehaviours;
+        //public EmulationType emulationType;
 
         /*public override string ToString() =>
             $"[nodeID: { nodeID};  worldTypes: {(WorldTypes)worldTypes}; numThinClients: {numThinClients};" +
-            $"emulationBehaviours: {emulationBehaviours}; ]";*/
+            $"emulationType: {emulationType}; ]";*/
     }
 
     public struct WorldActionRPC : IRpcCommand

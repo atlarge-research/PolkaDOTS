@@ -42,7 +42,8 @@ namespace PolkaDOTS
         public static int SwitchToStreamDuration;
         
         // ================== EMULATION ==================
-        public static EmulationBehaviours EmulationType;
+        public static EmulationType EmulationType;
+        public static string EmulationBehaviour;
         public static string EmulationFilePath;
         public static int NumThinClientPlayers;
         

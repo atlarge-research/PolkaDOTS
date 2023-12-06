@@ -34,7 +34,8 @@ namespace PolkaDOTS.Configuration
         public string SignalingUrl = "ws://127.0.0.1:7981";
         public MultiplayStreamingRoles MultiplayStreamingRole = MultiplayStreamingRoles.Disabled;
         public int SwitchToStreamDuration = 0;
-        public EmulationBehaviours EmulationType = EmulationBehaviours.None;
+        public EmulationType EmulationType = EmulationType.None;
+        public string EmulationBehaviour = "None";
         public string EmulationFile = Application.persistentDataPath + '\\' + "recordedInputs.inputtrace";
         public int NumThinClientPlayers = 0;
         public bool LogStats = false;
@@ -65,7 +66,7 @@ namespace PolkaDOTS.Configuration
 
         /*public override string ToString() =>
             $"[nodeID: {nodeID}; ip: {ip}; playType: {playTypes}; streamingRole: {streamingRoles};" +
-            $"serverNodeID: {serverNodeID}; services: {services}; emulationBehaviours: {emulationBehaviours}; ]";*/
+            $"serverNodeID: {serverNodeID}; services: {services}; emulationType: {emulationType}; ]";*/
     }
     
     /// <summary>
@@ -121,7 +122,8 @@ namespace PolkaDOTS.Configuration
         internal static readonly IntArgument SwitchToStreamDuration = new IntArgument("-switchToStream");
         
         // ================== EMULATION ==================
-        internal static readonly EnumArgument<EmulationBehaviours> EmulationType = new EnumArgument<EmulationBehaviours>("-emulationType");
+        internal static readonly EnumArgument<EmulationType> EmulationType = new EnumArgument<EmulationType>("-emulationType");
+        internal static readonly StringArgument EmulationBehaviour = new StringArgument("-emulationBehaviour");
         internal static readonly FilePathArgument EmulationFile = new FilePathArgument("-emulationFile");
         internal static readonly IntArgument NumThinClientPlayers = new IntArgument("-numThinClientPlayers");
         

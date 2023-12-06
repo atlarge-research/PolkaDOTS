@@ -64,10 +64,10 @@ namespace PolkaDOTS.Deployment
         // How the service names are handled when instantiating this world
         public ServiceFilterType serviceFilterType;
         // The player emulation behaviour to use on a client world
-        public EmulationBehaviours emulationBehaviours;
+        public EmulationType emulationType;
         
         public override string ToString() =>
             $"[worldType: {worldType}; multiplayStreamingRoles: {multiplayStreamingRoles}; serverNodeID: {serverNodeID}; streamingNodeID: {streamingNodeID};" +
-            $"numThinClients: {numThinClients}; services: {services}; serviceFilterType: {serviceFilterType}; emulationBehaviours: {emulationBehaviours}; ]";
+            $"numThinClients: {numThinClients}; services: {services}; serviceFilterType: {serviceFilterType}; emulationType: {emulationType}; ]";
     }
 }

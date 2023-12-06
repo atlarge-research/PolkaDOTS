@@ -22,4 +22,9 @@ namespace PolkaDOTS
     public struct NewPlayer : IComponentData, IEnableableComponent
     {
     }
+    
+    // Marks this player entity as a guest player
+    public struct GuestPlayer : IComponentData, IEnableableComponent
+    {
+    }
 }

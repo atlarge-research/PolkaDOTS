@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Unity.Entities;
 using Unity.Serialization;
 using UnityEngine;
 
@@ -10,11 +13,11 @@ namespace PolkaDOTS.Emulation
     public class Emulation : MonoBehaviour
     {
         public InputRecorder inputRecorder;
-        [DontSerialize]public EmulationBehaviours emulationType = EmulationBehaviours.None;
+        [DontSerialize]public EmulationType emulationType = EmulationType.None;
 
         public void Pause()
         {
-            if ((emulationType & EmulationBehaviours.Playback) == EmulationBehaviours.Playback)
+            if ((emulationType & EmulationType.Playback) == EmulationType.Playback)
             {
                 inputRecorder.PauseReplay();
             }
@@ -22,10 +25,16 @@ namespace PolkaDOTS.Emulation
 
         public void Play()
         {
-            if ((emulationType & EmulationBehaviours.Playback) == EmulationBehaviours.Playback)
+            if ((emulationType & EmulationType.Playback) == EmulationType.Playback)
             {
                 inputRecorder.StartReplay();
             }
+        }
+        
+
+        public void initializeSimulation()
+        {
+            // TODO
         }
         
 
@@ -60,14 +69,14 @@ namespace PolkaDOTS.Emulation
         
         private void OnApplicationQuit()
         {
-            if ((emulationType & EmulationBehaviours.Record) == EmulationBehaviours.Record)
+            if ((emulationType & EmulationType.Record) == EmulationType.Record)
             {
                 Debug.Log($"Saving capture file to {Config.EmulationFilePath}");
                 inputRecorder.StopCapture();
                 inputRecorder.SaveCaptureToFile(Config.EmulationFilePath);
             }
 
-            if ((emulationType & EmulationBehaviours.Playback) == EmulationBehaviours.Playback)
+            if ((emulationType & EmulationType.Playback) == EmulationType.Playback)
             {
                 inputRecorder.StopReplay();
             }
