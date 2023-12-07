@@ -56,207 +56,6 @@ namespace PolkaDOTS.Configuration
                 return false;
             }
 
-            bool isLocalConf = CommandLineParser.LocalConfigJson.Value != null;
-            JsonCmdArgs localArgs = new JsonCmdArgs();
-            if (isLocalConf)
-            {
-                Debug.Log("Using local config from file");
-                localArgs = (JsonCmdArgs)CommandLineParser.LocalConfigJson.Value;
-            }
-
-            // ================== DEPLOYMENT ==================
-            // Deployment configuration file, used to construct the Deployment Graph
-            if (CommandLineParser.ImportDeploymentConfig.Value != null)
-            {
-                Config.DeploymentConfig = (JsonDeploymentConfig)CommandLineParser.ImportDeploymentConfig.Value;
-                Config.isDeploymentService = true;
-            }
-            else
-            {
-                Config.isDeploymentService = false;
-            }
-
-            // Deployment ID
-            if (CommandLineParser.DeploymentID.Value != null)
-                Config.DeploymentID = (int)CommandLineParser.DeploymentID.Value;
-            else
-            {
-                Config.DeploymentID = localArgs.DeploymentID;
-            }
-
-            // Get remote config flag
-            #if UNITY_SERVER
-            Config.GetRemoteConfig = false;
-            #else
-            if (CommandLineParser.GetRemoteConfig.Value != null)
-                Config.GetRemoteConfig = (bool)CommandLineParser.GetRemoteConfig.Value;
-            else
-                Config.GetRemoteConfig = localArgs.GetRemoteConfig;
-            #endif
-
-            // Deployment service URL
-            if (CommandLineParser.DeploymentURL.Value != null)
-                Config.DeploymentURL = CommandLineParser.DeploymentURL.Value;
-            else
-                Config.DeploymentURL = localArgs.DeploymentURL;
-
-            // Deployment port
-            if (CommandLineParser.DeploymentPort.Value != null)
-                Config.DeploymentPort = (ushort)CommandLineParser.DeploymentPort.Value;
-            else
-                Config.DeploymentPort = (ushort)localArgs.DeploymentPort;
-
-            // ================== SIGNALING ==================
-            // Signaling URL
-            if (CommandLineParser.SignalingUrl.Value != null)
-                Config.SignalingUrl = CommandLineParser.SignalingUrl.Value;
-            else
-                Config.SignalingUrl = localArgs.SignalingUrl;
-            /* Signaling port
-            if (CommandLineParser.SignalingPort.Value != null)
-                Config.SignalingPort = (ushort)CommandLineParser.SignalingPort.Value;
-            else
-                Config.SignalingPort = (ushort)localArgs.SignalingPort;*/
-
-
-            // ================== APPLICATION ==================
-            // Debug
-            Config.DebugEnabled = CommandLineParser.DebugEnabled.Defined || localArgs.DebugEnabled;
-            // Seed
-            MD5 md5Hasher = MD5.Create();
-            if (CommandLineParser.Seed.Value != null)
-            {
-                var hashed = md5Hasher.ComputeHash(Encoding.UTF8.GetBytes(CommandLineParser.Seed.Value));
-                var ivalue = BitConverter.ToInt32(hashed, 0);
-                Config.Seed = ivalue;
-            }
-            else
-            {
-                var hashed = md5Hasher.ComputeHash(Encoding.UTF8.GetBytes(localArgs.Seed));
-                var ivalue = BitConverter.ToInt32(hashed, 0);
-                Config.Seed = ivalue;
-            }
-
-            // PlayType
-            #if UNITY_SERVER
-            Config.playTypes = GameBootstrap.BootstrapPlayTypes.Server;
-            #else
-            if (CommandLineParser.PlayType.Value != null)
-                Config.playTypes = (GameBootstrap.BootstrapPlayTypes)CommandLineParser.PlayType.Value;
-            else
-                Config.playTypes = localArgs.PlayType;
-            #endif
-            
-            // Server url
-            if (CommandLineParser.ServerUrl.Value != null)
-                Config.ServerUrl = (string)CommandLineParser.ServerUrl.Value;
-            else
-                Config.ServerUrl = (string)localArgs.ServerUrl;
-            // Server port
-            if (CommandLineParser.ServerPort.Value != null)
-                Config.ServerPort = (ushort)CommandLineParser.ServerPort.Value;
-            else
-                Config.ServerPort = (ushort)localArgs.ServerPort;
-
-            // Tick rates
-            if (CommandLineParser.NetworkTickRate.Value != null)
-                Config.NetworkTickRate = (int)CommandLineParser.NetworkTickRate.Value;
-            else
-                Config.NetworkTickRate = localArgs.NetworkTickRate;
-            if (CommandLineParser.SimulationTickRate.Value != null)
-                Config.SimulationTickRate = (int)CommandLineParser.SimulationTickRate.Value;
-            else
-                Config.SimulationTickRate = localArgs.SimulationTickRate;
-            
-            // Get take screenshots flag
-            if (CommandLineParser.TakeScreenshots.Value != null)
-                Config.TakeScreenshots = (bool)CommandLineParser.TakeScreenshots.Value;
-            else
-                Config.TakeScreenshots = localArgs.TakeScreenshots;
-            
-            // Get take screenshots interval
-            if (CommandLineParser.TakeScreenshotsInterval.Value != null)
-                Config.TakeScreenshotsInterval = (int)CommandLineParser.TakeScreenshotsInterval.Value;
-            else
-                Config.TakeScreenshotsInterval = localArgs.TakeScreenshotsInterval;
-            
-            // Get take screenshots save location
-            if (CommandLineParser.ScreenshotFolder.Value != null)
-                Config.ScreenshotFolder = (string)CommandLineParser.ScreenshotFolder.Value;
-            else
-                Config.ScreenshotFolder = localArgs.ScreenshotFolder;
-
-            
-            // Duration
-            if (CommandLineParser.Duration.Value != null)
-                Config.Duration = (int)CommandLineParser.Duration.Value;
-            else
-                Config.Duration = localArgs.Duration;
-            
-            // UserID
-            if (CommandLineParser.UserID.Value != null)
-                Config.UserID = (int)CommandLineParser.UserID.Value;
-            else
-                Config.UserID = localArgs.UserID;
-            if (Config.UserID == -1)
-            {
-                Config.UserID = Random.Range(0, 99999);
-            }
-
-            // ================== MULTIPLAY ==================
-            // Multiplay role
-            #if UNITY_SERVER
-            Config.multiplayStreamingRoles = MultiplayStreamingRoles.Disabled;
-            #else
-            if (CommandLineParser.MultiplayStreamingRole.Value != null)
-                Config.multiplayStreamingRoles =
-                    (MultiplayStreamingRoles)CommandLineParser.MultiplayStreamingRole.Value;
-            else
-                Config.multiplayStreamingRoles = localArgs.MultiplayStreamingRole;
-            #endif
-            
-            if (CommandLineParser.SwitchToStreamDuration.Value != null)
-                Config.SwitchToStreamDuration =
-                    (int)CommandLineParser.SwitchToStreamDuration.Value;
-            else
-                Config.SwitchToStreamDuration = localArgs.SwitchToStreamDuration;
-
-            // ================== EMULATION ==================
-            // Emulation type
-            if (CommandLineParser.EmulationType.Value != null)
-                Config.EmulationType = (EmulationType)CommandLineParser.EmulationType.Value;
-            else
-                Config.EmulationType = localArgs.EmulationType;
-            
-            // Emulation behaviour
-            if (CommandLineParser.EmulationBehaviour.Value != null)
-                Config.EmulationBehaviour = CommandLineParser.EmulationBehaviour.Value;
-            else
-                Config.EmulationBehaviour = localArgs.EmulationBehaviour;
-            
-            // Emulation file path
-            if (CommandLineParser.EmulationFile.Value != null)
-                Config.EmulationFilePath = CommandLineParser.EmulationFile.Value;
-            else
-                Config.EmulationFilePath = localArgs.EmulationFile;
-
-            // Number of thin clients
-            if (CommandLineParser.NumThinClientPlayers.Value != null)
-                Config.NumThinClientPlayers = (int)CommandLineParser.NumThinClientPlayers.Value;
-            else
-                Config.NumThinClientPlayers = localArgs.NumThinClientPlayers;
-            
-            // Log statistics to csv file
-            if (CommandLineParser.LogStats.Value != null)
-                Config.LogStats = (bool)CommandLineParser.LogStats.Value;
-            else
-                Config.LogStats = localArgs.LogStats;
-            
-            // Statistics csv filepath
-            if (CommandLineParser.StatsFilePath.Value != null)
-                Config.StatsFilePath = CommandLineParser.StatsFilePath.Value;
-            else
-                Config.StatsFilePath = localArgs.StatsFile;
 
 #if UNITY_EDITOR
 
@@ -271,20 +70,20 @@ namespace PolkaDOTS.Configuration
             ClientServerBootstrap.PlayType editorPlayType =
                 (ClientServerBootstrap.PlayType)EditorPrefs.GetInt(s_PlayModeTypeKey,
                     (int)ClientServerBootstrap.PlayType.ClientAndServer);
-            if (Config.playTypes != GameBootstrap.BootstrapPlayTypes.StreamedClient)
-                Config.playTypes = (GameBootstrap.BootstrapPlayTypes)editorPlayType;
+            if (ApplicationConfig.PlayType != GameBootstrap.BootstrapPlayTypes.StreamedClient)
+                ApplicationConfig.PlayType.SetValue((GameBootstrap.BootstrapPlayTypes)editorPlayType);
             // Number thin clients
             int editorNumThinClients = EditorPrefs.GetInt(s_RequestedNumThinClientsKey, 0);
-            Config.NumThinClientPlayers = editorNumThinClients;
+            ApplicationConfig.NumThinClientPlayers.SetValue(editorNumThinClients); 
             // Server address
             string editorServerAddress = EditorPrefs.GetString(s_AutoConnectionAddressKey, "127.0.0.1");
-            Config.ServerUrl = editorServerAddress;
+            ApplicationConfig.ServerUrl.SetValue(editorServerAddress);
             //Server port
             int editorServerPort = EditorPrefs.GetInt(s_AutoConnectionPortKey, 7979);
             if (editorServerPort != 0)
-                Config.ServerPort = (ushort)editorServerPort;
+                ApplicationConfig.ServerPort.SetValue(editorServerPort); 
 
-            // Override Deployment Config using this MonoBehaviour's attributes
+            // Override Deployment ApplicationConfig using this MonoBehaviour's attributes
             if (editorArgs.useDeploymentConfig && !ClonesManager.IsClone())
             {
                 if (editorArgs.deploymentConfig.IsNullOrEmpty())
@@ -294,45 +93,26 @@ namespace PolkaDOTS.Configuration
                 else
                 {
                     //Use Newtonsoft JSON parsing to support enum serialization to/from string
-                    Config.DeploymentConfig = JsonConvert.DeserializeObject<JsonDeploymentConfig>(editorArgs.deploymentConfig);
-                    Config.isDeploymentService = true;
+                    ApplicationConfig.ImportDeploymentConfig.SetValue(JsonConvert.DeserializeObject<JsonDeploymentConfig>(editorArgs.deploymentConfig)); 
                 }
             }
 
 #endif
 
             // Sanity checks
-            if (Config.GetRemoteConfig && Config.DeploymentURL.IsNullOrEmpty())
-            {
-                Debug.Log($"Remote config flag set with no deployment service url provided, using loopback!");
-                Config.DeploymentURL = "127.0.0.1";
-            }
-
-            if (Config.GetRemoteConfig && Config.DeploymentID == -1)
+            if (ApplicationConfig.GetRemoteConfig && ApplicationConfig.DeploymentID == -1)
             {
                 Debug.Log($"Remote config flag set with no deployment ID provided, using 0!");
-                Config.DeploymentID = 0;
+                ApplicationConfig.DeploymentID.SetValue(0);
             }
 
-            if (Config.playTypes == GameBootstrap.BootstrapPlayTypes.Server &&
-                Config.multiplayStreamingRoles != MultiplayStreamingRoles.Disabled)
+            if (ApplicationConfig.PlayType == GameBootstrap.BootstrapPlayTypes.Server &&
+                ApplicationConfig.MultiplayStreamingRole != MultiplayStreamingRoles.Disabled)
             {
                 Debug.Log("Cannot run Multiplay streaming on Server, disabling Multiplay!");
-                Config.multiplayStreamingRoles = MultiplayStreamingRoles.Disabled;
+                ApplicationConfig.MultiplayStreamingRole.SetValue(MultiplayStreamingRoles.Disabled);
             }
-
-            if (Config.playTypes != GameBootstrap.BootstrapPlayTypes.Server && Config.ServerUrl.IsNullOrEmpty())
-            {
-                Debug.Log($"No server ip given to client! Falling back to 127.0.0.1 ");
-                Config.ServerUrl = $"127.0.0.1";
-            }
-
-            if (Config.multiplayStreamingRoles != MultiplayStreamingRoles.Disabled &&
-                Config.SignalingUrl.IsNullOrEmpty())
-            {
-                Debug.Log("Run as Multiplay streaming host or client with no signaling server!");
-            }
-
+            
             return true;
         }
 

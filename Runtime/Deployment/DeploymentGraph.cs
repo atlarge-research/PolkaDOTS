@@ -134,7 +134,7 @@ namespace PolkaDOTS.Deployment
                         var serverNode = Nodes[worldConfig.serverNodeID];
                         // If that node is the one this system is running on, tell the remote to use our ip
                         FixedString64Bytes endpoint = serverNode.endpoint;
-                        if (worldConfig.serverNodeID == Config.DeploymentID && node.id != Config.DeploymentID )
+                        if (worldConfig.serverNodeID == ApplicationConfig.DeploymentID && node.id != ApplicationConfig.DeploymentID )
                             endpoint = "source";
                         cRPC.serverIP = endpoint;
                     }
@@ -143,7 +143,7 @@ namespace PolkaDOTS.Deployment
                        Debug.Log($"Node {nodeID} World {worldConfig.worldName} has nonexistent server node id: {worldConfig.serverNodeID}!");
                     }
                     // Give the same server port to all nodes
-                    cRPC.serverPort = Config.ServerPort;
+                    cRPC.serverPort = (ushort)ApplicationConfig.ServerPort;
 
                     // Find and set signaling/streaming URL
                     if(worldConfig.streamingNodeID == node.id)
@@ -154,7 +154,7 @@ namespace PolkaDOTS.Deployment
                         var streamingNode = Nodes[worldConfig.streamingNodeID];
                         
                         FixedString64Bytes endpoint = streamingNode.endpoint;
-                        if (worldConfig.serverNodeID == Config.DeploymentID && node.id != Config.DeploymentID )
+                        if (worldConfig.serverNodeID == ApplicationConfig.DeploymentID && node.id != ApplicationConfig.DeploymentID )
                             endpoint = "source";
                         
                         cRPC.signallingIP = endpoint;
@@ -187,7 +187,12 @@ namespace PolkaDOTS.Deployment
         /// </summary>
         private void ParseDeploymentConfig()
         {
-            JsonDeploymentNode[] jsonNodes = Config.DeploymentConfig.nodes;
+            if(ApplicationConfig.ImportDeploymentConfig.Value is null)
+                return;
+
+            JsonDeploymentConfig JPC = (JsonDeploymentConfig)ApplicationConfig.ImportDeploymentConfig.Value;
+            
+            JsonDeploymentNode[] jsonNodes = JPC.nodes;
             for (int i = 0; i < jsonNodes.Length; i++)
             {
                 JsonDeploymentNode jsonNode = jsonNodes[i];
@@ -203,7 +208,7 @@ namespace PolkaDOTS.Deployment
                 }
                 else
                 {
-                    if(NetworkEndpoint.TryParse(jsonNode.nodeIP, Config.DeploymentPort, out NetworkEndpoint endpoint,
+                    if(NetworkEndpoint.TryParse(jsonNode.nodeIP, (ushort)ApplicationConfig.DeploymentPort, out NetworkEndpoint endpoint,
                            NetworkFamily.Ipv4))
                     {
                         newNode.endpoint = jsonNode.nodeIP;
@@ -241,7 +246,7 @@ namespace PolkaDOTS.Deployment
                 
             }
             // Check experiment action validity
-            ExperimentAction[] actionsArray = Config.DeploymentConfig.experimentActions;
+            ExperimentAction[] actionsArray = JPC.experimentActions;
             foreach (ExperimentAction experimentAction in actionsArray)
             {
                 DeploymentNodeExperimentAction nodeExperimentAction = new DeploymentNodeExperimentAction

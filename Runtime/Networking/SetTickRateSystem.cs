@@ -20,8 +20,8 @@ namespace PolkaDOTS.Networking
         {
             // Create and set a singleton component with the tick rate parameters.
             ClientServerTickRate cst = new ClientServerTickRate {
-                NetworkTickRate = Config.NetworkTickRate,
-                SimulationTickRate = Config.SimulationTickRate
+                NetworkTickRate = ApplicationConfig.NetworkTickRate,
+                SimulationTickRate = ApplicationConfig.SimulationTickRate
             };
             cst.ResolveDefaults();
             EntityManager.CreateSingleton<ClientServerTickRate>(cst,"ClientServerTickRateSingleton");

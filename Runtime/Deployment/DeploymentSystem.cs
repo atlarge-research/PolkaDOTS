@@ -105,14 +105,14 @@ namespace PolkaDOTS.Deployment
         {
             _deploymentGraph = new DeploymentGraph();
             // Check if deployment graph contains configuration for this local node
-            DeploymentNode? node = _deploymentGraph.GetNodeByID(Config.DeploymentID);
+            DeploymentNode? node = _deploymentGraph.GetNodeByID(ApplicationConfig.DeploymentID);
             _allNodesConnected = false;
             _startTime = double.NaN;
             if (node.HasValue)
             {
                 Debug.Log("Overriding local config from deployment graph");
-                _deploymentGraph.SetConnected(Config.DeploymentID);
-                List<DeploymentConfigRPC> cRPCs = _deploymentGraph.NodeToConfigRPCs(Config.DeploymentID);
+                _deploymentGraph.SetConnected(ApplicationConfig.DeploymentID);
+                List<DeploymentConfigRPC> cRPCs = _deploymentGraph.NodeToConfigRPCs(ApplicationConfig.DeploymentID);
                 foreach (var cRPC in cRPCs)
                 {
                     DeploymentConfigHelpers.HandleDeploymentConfigRPC(cRPC, NetworkEndpoint.LoopbackIpv4, out NativeList<WorldUnmanaged> newWorlds);
@@ -209,9 +209,9 @@ namespace PolkaDOTS.Deployment
                 
                 var experimentAction = _deploymentGraph.ExperimentActionList[experimentID];
                 double elapsed = World.Time.ElapsedTime - _startTime;
-                if (elapsed > Config.Duration)
+                if (elapsed > ApplicationConfig.Duration)
                 {
-                    Debug.Log($"[{DateTime.Now.TimeOfDay}]: Experiment duration of {Config.Duration} seconds elapsed! Exiting.");
+                    Debug.Log($"[{DateTime.Now.TimeOfDay}]: Experiment duration of {ApplicationConfig.Duration} seconds elapsed! Exiting.");
                     BootstrapInstance.instance.ExitGame();
                 }
                 if (elapsed > experimentAction.delay && !experimentAction.done)
@@ -278,7 +278,7 @@ namespace PolkaDOTS.Deployment
                             {
                                 nodeID = node.id, action = action, worldName = worldName, connectionIP = connectionURL, connectionPort = connectionPort
                             };
-                            if (node.id == Config.DeploymentID)
+                            if (node.id == ApplicationConfig.DeploymentID)
                             {
                                 // If the action is for the local node, handle it 
                                 if (!DeploymentConfigHelpers.HandleWorldAction(wa, NetworkEndpoint.LoopbackIpv4))
@@ -340,7 +340,7 @@ namespace PolkaDOTS.Deployment
                 commandBuffer.AddComponent<ConfigurationSent>(entity);
                 //commandBuffer.AddComponent<NetworkStreamInGame>(entity);
                 var req = commandBuffer.CreateEntity();
-                commandBuffer.AddComponent(req, new RequestConfigRPC{nodeID = Config.DeploymentID});
+                commandBuffer.AddComponent(req, new RequestConfigRPC{nodeID = ApplicationConfig.DeploymentID});
                 commandBuffer.AddComponent(req, new SendRpcCommandRequest { TargetConnection = entity });
                 Debug.Log($"Sending configuration request.");
             }
@@ -391,7 +391,7 @@ namespace PolkaDOTS.Deployment
                 {
                     Debug.Log($"World with name {wRPC.worldName} not found!");
                     Entity res = commandBuffer.CreateEntity();
-                    commandBuffer.AddComponent(res, new ConfigErrorRPC{nodeID = Config.DeploymentID, errorType = ConfigErrorType.UnknownWorld});
+                    commandBuffer.AddComponent(res, new ConfigErrorRPC{nodeID = ApplicationConfig.DeploymentID, errorType = ConfigErrorType.UnknownWorld});
                     commandBuffer.AddComponent(res, new SendRpcCommandRequest { TargetConnection = reqSrc.ValueRO.SourceConnection });
                 }
                
@@ -401,9 +401,9 @@ namespace PolkaDOTS.Deployment
             
             commandBuffer.Playback(EntityManager);
 
-            if (_configReceived && (World.Time.ElapsedTime - _startTime) > Config.Duration)
+            if (_configReceived && (World.Time.ElapsedTime - _startTime) > ApplicationConfig.Duration)
             {
-                Debug.Log($"[{DateTime.Now.TimeOfDay}]: Experiment duration of {Config.Duration} seconds elapsed! Exiting.");
+                Debug.Log($"[{DateTime.Now.TimeOfDay}]: Experiment duration of {ApplicationConfig.Duration} seconds elapsed! Exiting.");
                 BootstrapInstance.instance.ExitGame();
             }
 
@@ -454,7 +454,7 @@ namespace PolkaDOTS.Deployment
                 // todo remove this
                 if (cRPC.serverIP == "127.0.0.1")
                 {
-                    cRPC.serverIP = Config.ServerUrl;
+                    cRPC.serverIP = new FixedString64Bytes(ApplicationConfig.ServerUrl);
                 }
             }
             if (cRPC.signallingIP == "source")
@@ -464,7 +464,7 @@ namespace PolkaDOTS.Deployment
                 // todo remove this
                 if (cRPC.signallingIP  == "127.0.0.1")
                 {
-                    cRPC.serverIP = Config.SignalingUrl;
+                    cRPC.serverIP = new FixedString64Bytes(ApplicationConfig.SignalingUrl);
                 }
             }
             
@@ -527,7 +527,7 @@ namespace PolkaDOTS.Deployment
                         // todo remove this
                         if (connURL == "127.0.0.1")
                         {
-                            signalingConnUrl = Config.SignalingUrl;
+                            signalingConnUrl = ApplicationConfig.SignalingUrl;
                         }
                         world.EntityManager.AddComponentData(connReq,
                             new StreamedClientRequestConnect{ url = new FixedString512Bytes(signalingConnUrl) });
@@ -536,7 +536,7 @@ namespace PolkaDOTS.Deployment
                         // todo remove this
                         if (connURL == "127.0.0.1")
                         {
-                            connURL = Config.ServerUrl;
+                            connURL = ApplicationConfig.ServerUrl;
                         }
                         NetworkEndpoint.TryParse(connURL, connPort,
                             out NetworkEndpoint gameEndpoint, NetworkFamily.Ipv4);

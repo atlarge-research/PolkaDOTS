@@ -48,22 +48,21 @@ namespace PolkaDOTS.Bootstrap
             // Pre world creation initialization
             BootstrapInstance.instance = this;
             NetworkStreamReceiveSystem.DriverConstructor = new NetCodeDriverConstructor();
-            
             // Deployment world handles both requesting and answering configuration requests
-            if (Config.GetRemoteConfig || Config.isDeploymentService)
+            if (ApplicationConfig.GetRemoteConfig || ApplicationConfig.ImportDeploymentConfig is not null)
             {
                 deploymentWorld = SetupDeploymentServiceWorld();
                 // Create connection listen/connect request in deployment world
-                if (Config.GetRemoteConfig)
+                if (ApplicationConfig.GetRemoteConfig)
                 {
                     // Deployment client
                     // Parse deployment network endpoint
-                    if (!NetworkEndpoint.TryParse(Config.DeploymentURL, Config.DeploymentPort,
+                    if (!NetworkEndpoint.TryParse(ApplicationConfig.DeploymentURL, (ushort)ApplicationConfig.DeploymentPort,
                             out NetworkEndpoint deploymentEndpoint,
                             NetworkFamily.Ipv4))
                     {
-                        Debug.Log($"Couldn't parse deployment URL of {Config.DeploymentURL}:{Config.DeploymentPort}, falling back to 127.0.0.1!");
-                        deploymentEndpoint = NetworkEndpoint.LoopbackIpv4.WithPort(Config.DeploymentPort);
+                        Debug.Log($"Couldn't parse deployment URL of {ApplicationConfig.DeploymentURL}:{ApplicationConfig.DeploymentPort}, falling back to 127.0.0.1!");
+                        deploymentEndpoint = NetworkEndpoint.LoopbackIpv4.WithPort((ushort)ApplicationConfig.DeploymentPort);
                     }
                     
                     Entity connReq = deploymentWorld.EntityManager.CreateEntity();
@@ -75,7 +74,7 @@ namespace PolkaDOTS.Bootstrap
                     // Deployment server
                     Entity listenReq = deploymentWorld.EntityManager.CreateEntity();
                     deploymentWorld.EntityManager.AddComponentData(listenReq,
-                        new NetworkStreamRequestListen { Endpoint = NetworkEndpoint.AnyIpv4.WithPort(Config.DeploymentPort) });
+                        new NetworkStreamRequestListen { Endpoint = NetworkEndpoint.AnyIpv4.WithPort((ushort)ApplicationConfig.DeploymentPort) });
                 }
             }
             else
@@ -96,14 +95,14 @@ namespace PolkaDOTS.Bootstrap
         {
             Debug.Log("Creating deployment world");
             //BootstrappingConfig.DeploymentClientConnectAddress = deploymentEndpoint;
-            //BootstrappingConfig.DeploymentPort = Config.DeploymentPort;
+            //BootstrappingConfig.DeploymentPort = ApplicationConfig.DeploymentPort;
             //BootstrappingConfig.DeploymentServerListenAddress = NetworkEndpoint.AnyIpv4.WithPort(BootstrappingConfig.DeploymentPort);
             
             // Create the world
-            WorldFlagsExtension flags =  Config.GetRemoteConfig ? WorldFlagsExtension.DeploymentClient : WorldFlagsExtension.DeploymentServer;
+            WorldFlagsExtension flags =  ApplicationConfig.GetRemoteConfig ? WorldFlagsExtension.DeploymentClient : WorldFlagsExtension.DeploymentServer;
             var world = new World("DeploymentWorld", (WorldFlags)flags);
             // Fetch all editor and package (but not user-added) systems
-            WorldSystemFilterFlags filterFlags =  Config.GetRemoteConfig ? WorldSystemFilterFlags.ClientSimulation : WorldSystemFilterFlags.ServerSimulation;
+            WorldSystemFilterFlags filterFlags =  ApplicationConfig.GetRemoteConfig ? WorldSystemFilterFlags.ClientSimulation : WorldSystemFilterFlags.ServerSimulation;
             NativeList<SystemTypeIndex> systems = TypeManager.GetUnitySystemsTypeIndices(filterFlags);
             
             // Remove built-in NetCode world initialization 
@@ -119,7 +118,7 @@ namespace PolkaDOTS.Bootstrap
             }
 
             // Add deployment service systems
-            if (Config.GetRemoteConfig)
+            if (ApplicationConfig.GetRemoteConfig)
                 filteredSystems.Add(TypeManager.GetSystemTypeIndex(typeof(DeploymentReceiveSystem)));
             else
                 filteredSystems.Add(TypeManager.GetSystemTypeIndex(typeof(DeploymentServiceSystem)));
@@ -149,10 +148,10 @@ namespace PolkaDOTS.Bootstrap
 
         public void SetupWorldsFromLocalConfig()
         {
-            //SetBootStrapConfig(Config.ServerUrl, Config.ServerPort);
+            //SetBootStrapConfig(ApplicationConfig.ServerUrl, ApplicationConfig.ServerPort);
             NativeList<WorldUnmanaged> newWorlds = new NativeList<WorldUnmanaged>(Allocator.Temp);
-            SetupWorlds(Config.multiplayStreamingRoles, Config.playTypes, ref newWorlds,
-                Config.NumThinClientPlayers, autoStart: true, autoConnect: true, Config.ServerUrl, Config.ServerPort, Config.SignalingUrl);
+            SetupWorlds(ApplicationConfig.MultiplayStreamingRole, ApplicationConfig.PlayType, ref newWorlds,
+                ApplicationConfig.NumThinClientPlayers, autoStart: true, autoConnect: true, ApplicationConfig.ServerUrl, (ushort)ApplicationConfig.ServerPort, ApplicationConfig.SignalingUrl);
         }
         
         
@@ -168,8 +167,8 @@ namespace PolkaDOTS.Bootstrap
             List<World> newWorlds = new List<World>();
             
             // ================== SETUP WORLDS ==================
-            
-            Config.multiplayStreamingRoles = mRole;
+
+            ApplicationConfig.MultiplayStreamingRole.SetValue(mRole);
             
             
             if (playTypes == BootstrapPlayTypes.StreamedClient)
@@ -477,7 +476,7 @@ namespace PolkaDOTS.Bootstrap
 
         public void ExitGame()
         {
-            if (Config.LogStats)
+            if (ApplicationConfig.LogStats)
                 StatisticsWriterInstance.WriteStatisticsBuffer();
                 
             #if UNITY_EDITOR

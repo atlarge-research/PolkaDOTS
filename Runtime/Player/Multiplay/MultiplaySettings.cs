@@ -52,11 +52,11 @@ namespace PolkaDOTS.Multiplay
             if (Settings != null) return;
             Settings = new MultiplaySettings();
             
-            Settings.SignalingAddress = Config.SignalingUrl;
+            Settings.SignalingAddress = ApplicationConfig.SignalingUrl;
 
             Settings.SignalingSettings = new WebSocketSignalingSettings
             (
-                url: Config.SignalingUrl
+                url: ApplicationConfig.SignalingUrl
             );
             
             var codecs = VideoStreamReceiver.GetAvailableCodecs();

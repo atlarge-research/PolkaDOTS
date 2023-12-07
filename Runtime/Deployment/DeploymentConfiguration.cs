@@ -1,9 +1,58 @@
-﻿using System;
-using PolkaDOTS.Emulation;
+using System;
 
 namespace PolkaDOTS.Deployment
 {
-    [Flags]
+    /// <summary>
+    /// Represents valid deployment configuration from Json file
+    /// </summary>
+    [Serializable]
+    public struct JsonDeploymentConfig
+    {
+        public JsonDeploymentNode[] nodes;
+        public ExperimentAction[] experimentActions;
+    }
+    
+    /// <summary>
+    /// Represents a deployment node
+    /// </summary>
+    [Serializable]
+    public struct JsonDeploymentNode
+    {
+        public int nodeID;
+        public string nodeIP;
+        public WorldConfig[] worldConfigs;
+    }
+    
+    /// <summary>
+    /// Perform set of experiment actions at a certain time specified by delay
+    /// </summary>
+    [Serializable]
+    public class ExperimentAction
+    {
+        public int delay;
+        public NodeAction[] actions;
+    }
+    
+    /// <summary>
+    /// Specified set of world actions to perform on node with matching id
+    /// </summary>
+    [Serializable]
+    public class NodeAction
+    {
+        public int nodeID;
+        public string[] worldNames;
+        public WorldAction[] actions;
+    }
+    
+    [Serializable]
+    public enum WorldAction
+    {
+        Stop,
+        Start,
+        Connect,
+    }
+    
+        [Flags]
     [Serializable]
     public enum WorldTypes
     {
@@ -37,6 +86,17 @@ namespace PolkaDOTS.Deployment
         Create,
         Start,
         Connect
+    }
+    
+    [Flags]
+    [Serializable]
+    public enum EmulationType :  int
+    {
+        None              = 0,
+        Idle              = 0,
+        Playback          = 1,
+        Simulation        = 1 << 1,
+        Record            = 1 << 2,
     }
     
     /// <summary>

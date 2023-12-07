@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Unity.Entities;
+using PolkaDOTS.Deployment;
 using Unity.Serialization;
 using UnityEngine;
 
@@ -42,13 +40,13 @@ namespace PolkaDOTS.Emulation
         {
             if (inputRecorder.replayIsRunning)
             {
-                Debug.Log($"Resuming input playback from {Config.EmulationFilePath}");
+                Debug.Log($"Resuming input playback from {ApplicationConfig.EmulationFile}");
                 Play();
                 return;
             }
             try
             {
-                inputRecorder.LoadCaptureFromFile(Config.EmulationFilePath);
+                inputRecorder.LoadCaptureFromFile(ApplicationConfig.EmulationFile);
             }
             catch (Exception ex)
             {
@@ -56,7 +54,7 @@ namespace PolkaDOTS.Emulation
                 Debug.LogError(ex.ToString());
                 return;
             } 
-            Debug.Log($"Starting input playback from {Config.EmulationFilePath}");
+            Debug.Log($"Starting input playback from {ApplicationConfig.EmulationFile}");
             inputRecorder.StartReplay();
         }
         
@@ -71,9 +69,9 @@ namespace PolkaDOTS.Emulation
         {
             if ((emulationType & EmulationType.Record) == EmulationType.Record)
             {
-                Debug.Log($"Saving capture file to {Config.EmulationFilePath}");
+                Debug.Log($"Saving capture file to {ApplicationConfig.EmulationFile}");
                 inputRecorder.StopCapture();
-                inputRecorder.SaveCaptureToFile(Config.EmulationFilePath);
+                inputRecorder.SaveCaptureToFile(ApplicationConfig.EmulationFile);
             }
 
             if ((emulationType & EmulationType.Playback) == EmulationType.Playback)

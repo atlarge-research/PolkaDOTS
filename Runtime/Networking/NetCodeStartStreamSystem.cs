@@ -30,7 +30,7 @@ namespace PolkaDOTS.Networking
                 .WithNone<NetworkStreamInGame>();
             state.RequireForUpdate(state.GetEntityQuery(builder));
             
-            //name = state.WorldUnmanaged.IsCloudHostClient() ? $"-1" : $"{Config.UserID}";
+            //name = state.WorldUnmanaged.IsCloudHostClient() ? $"-1" : $"{ApplicationConfig.UserID}";
             
         }
 

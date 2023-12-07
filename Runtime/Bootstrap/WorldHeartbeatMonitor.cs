@@ -32,7 +32,7 @@ namespace PolkaDOTS
                     if (timeOut <= 0)
                     {
                         Debug.LogWarning("Heartbeat timed out with no worlds found, exiting!");  
-                        if (Config.LogStats)
+                        if (ApplicationConfig.LogStats)
                             StatisticsWriterInstance.WriteStatisticsBuffer();
                 
                         #if UNITY_EDITOR

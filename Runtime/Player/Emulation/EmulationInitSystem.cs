@@ -36,11 +36,11 @@ namespace PolkaDOTS.Emulation
             }
             Enabled = false;
 
-            emulation.emulationType = Config.EmulationType;
+            emulation.emulationType = ApplicationConfig.EmulationType;
             Debug.Log($"Emulation type is {emulation.emulationType}");
             
             // Multiplay guest emulation only supports input playback
-            if (Config.multiplayStreamingRoles == MultiplayStreamingRoles.Guest && (emulation.emulationType & EmulationType.Simulation) == EmulationType.Simulation)
+            if (ApplicationConfig.MultiplayStreamingRole == MultiplayStreamingRoles.Guest && (emulation.emulationType & EmulationType.Simulation) == EmulationType.Simulation)
             {
                 Debug.Log("Multiplay guest emulation only supports input playback, switching to it.");
                 emulation.emulationType ^= EmulationType.Simulation;

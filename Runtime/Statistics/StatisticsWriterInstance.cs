@@ -18,13 +18,13 @@ namespace PolkaDOTS.Statistics
         public static bool ready;
         private void Awake()
         {
-            if (!Config.LogStats) {
+            if (!ApplicationConfig.LogStats) {
                 return;
             }
 
-            if (File.Exists(Config.StatsFilePath)){
+            if (File.Exists(ApplicationConfig.StatsFilePath)){
                 // Don't overwrite existing data
-                Debug.Log($"Stats file {Config.StatsFilePath} already exists. Ignoring -logStats.");
+                Debug.Log($"Stats file {ApplicationConfig.StatsFilePath} already exists. Ignoring -logStats.");
                 return;
             }
 
@@ -37,7 +37,7 @@ namespace PolkaDOTS.Statistics
 
         private void OnDisable()
         {
-            if (Config.LogStats && ready)
+            if (ApplicationConfig.LogStats && ready)
             {
                 // Write statistics before exit
                 if(!instance.written)
@@ -49,7 +49,7 @@ namespace PolkaDOTS.Statistics
 
         public void Update()
         {
-            if (Config.LogStats && ready)
+            if (ApplicationConfig.LogStats && ready)
             {
                 instance.Update();
             }
@@ -139,23 +139,23 @@ namespace PolkaDOTS.Statistics
             try
             {
                 // Write header
-                if (!File.Exists(Config.StatsFilePath))
+                if (!File.Exists(ApplicationConfig.StatsFilePath))
                 {
-                    using (var file = File.Open(Config.StatsFilePath, FileMode.Create))
+                    using (var file = File.Open(ApplicationConfig.StatsFilePath, FileMode.Create))
                     {
                         file.Write(HeaderToBytes());
                     }
                 }
                 
                 // Write data
-                using (var file = File.Open(Config.StatsFilePath, FileMode.Append))
+                using (var file = File.Open(ApplicationConfig.StatsFilePath, FileMode.Append))
                 {
                     file.Write(Encoding.ASCII.GetBytes(metricsBuffer));
                 }
             }
             catch (Exception e)
             {
-                Debug.LogError($"Failed to write statistics to {Config.StatsFilePath} with exception {e}");
+                Debug.LogError($"Failed to write statistics to {ApplicationConfig.StatsFilePath} with exception {e}");
             }
             
             written = true;

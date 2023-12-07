@@ -16,7 +16,7 @@ namespace PolkaDOTS.Debugging
         {
             number = 0;
             lastUpdate = -1.0;
-            if (!Config.TakeScreenshots)
+            if (!ApplicationConfig.TakeScreenshots)
             {
                 state.Enabled = false;
             }
@@ -24,13 +24,13 @@ namespace PolkaDOTS.Debugging
 
         public void OnUpdate(ref SystemState state)
         {
-            if (state.World.Time.ElapsedTime - lastUpdate < Config.TakeScreenshotsInterval)
+            if (state.World.Time.ElapsedTime - lastUpdate < ApplicationConfig.TakeScreenshotsInterval)
             {
                 return;
             }
             lastUpdate = state.World.Time.ElapsedTime;
             
-            ScreenCapture.CaptureScreenshot($"{Config.ScreenshotFolder}/screenshot_{number}.png");
+            ScreenCapture.CaptureScreenshot($"{ApplicationConfig.ScreenshotFolder}/screenshot_{number}.png");
             number++;
         }
         
