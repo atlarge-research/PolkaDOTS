@@ -19,6 +19,7 @@ namespace PolkaDOTS
         public static readonly CommandLineParser.IntArgument DeploymentPort = new CommandLineParser.IntArgument("-deploymentPort", 7980);
         
         // ================== APPLICATION ==================
+        public static readonly CommandLineParser.FlagArgument NoGraphics = new CommandLineParser.FlagArgument("-nographics", false);
         public static readonly CommandLineParser.FlagArgument DebugEnabled = new CommandLineParser.FlagArgument("-debug", false);
         public static readonly CommandLineParser.StringArgument Seed = new CommandLineParser.StringArgument("-seed", "42");
         public static readonly CommandLineParser.EnumArgument<GameBootstrap.BootstrapPlayTypes> PlayType = new CommandLineParser.EnumArgument<GameBootstrap.BootstrapPlayTypes>("-playType", GameBootstrap.BootstrapPlayTypes.Client);

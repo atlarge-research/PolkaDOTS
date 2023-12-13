@@ -338,8 +338,14 @@ namespace PolkaDOTS.Bootstrap
         
         public static World CreateDefaultClientWorld(string worldName, bool isHost = false, bool isCloudHost = false)
         {
-            var clientSystems = DefaultWorldInitialization.GetAllSystems(WorldSystemFilterFlags.ClientSimulation |
-                                                                         WorldSystemFilterFlags.Presentation);
+            WorldSystemFilterFlags flags = WorldSystemFilterFlags.ClientSimulation |
+                                           WorldSystemFilterFlags.Presentation;
+            // If we aren't running graphics on this client (e.g. a simulated player) then don't run presentation systems.
+            if (ApplicationConfig.NoGraphics.Value)
+            {
+                flags = WorldSystemFilterFlags.ClientSimulation;
+            }
+            var clientSystems = DefaultWorldInitialization.GetAllSystems(flags);
             // Disable the default NetCode world configuration
             var filteredClientSystems = new List<Type>();
             foreach (var system in clientSystems)
