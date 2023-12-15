@@ -70,11 +70,9 @@ namespace PolkaDOTS.Configuration
             ClientServerBootstrap.PlayType editorPlayType =
                 (ClientServerBootstrap.PlayType)EditorPrefs.GetInt(s_PlayModeTypeKey,
                     (int)ClientServerBootstrap.PlayType.ClientAndServer);
-            if (ApplicationConfig.PlayType != GameBootstrap.BootstrapPlayTypes.StreamedClient)
+            if (ApplicationConfig.PlayType != GameBootstrap.BootstrapPlayTypes.StreamedClient &&
+                ApplicationConfig.PlayType != GameBootstrap.BootstrapPlayTypes.SimulatedClient )
                 ApplicationConfig.PlayType.SetValue((GameBootstrap.BootstrapPlayTypes)editorPlayType);
-            // Number thin clients
-            int editorNumThinClients = EditorPrefs.GetInt(s_RequestedNumThinClientsKey, 0);
-            ApplicationConfig.NumThinClientPlayers.SetValue(editorNumThinClients); 
             // Server address
             string editorServerAddress = EditorPrefs.GetString(s_AutoConnectionAddressKey, "127.0.0.1");
             ApplicationConfig.ServerUrl.SetValue(editorServerAddress);

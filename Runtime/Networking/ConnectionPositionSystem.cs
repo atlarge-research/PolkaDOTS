@@ -21,7 +21,7 @@ namespace PolkaDOTS.Networking
             state.EntityManager.SetName(grid, "GhostImportanceSingleton");
             state.EntityManager.AddComponentData(grid, new GhostDistanceData
             {
-                TileSize = new int3(5, 5, 5),
+                TileSize = new int3(16, 16, 16),
                 TileCenter = new int3(0, 0, 0),
                 TileBorderWidth = new float3(1f, 1f, 1f),
             });

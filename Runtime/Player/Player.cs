@@ -14,7 +14,6 @@ namespace PolkaDOTS
             
         // Connection related fields
         [GhostField] public FixedString32Bytes Username;
-        public int OwnerNetworkId;
         public BlobAssetReference<BlobString> multiplayConnectionID;
     }
     

@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using PolkaDOTS.Configuration;
 using PolkaDOTS.Debugging;
 using PolkaDOTS.Deployment;
@@ -42,14 +44,21 @@ namespace PolkaDOTS.Bootstrap
                 Application.Quit();
                 return false;
             }
-
+            
+            // If there is a start delay, wait to perform bootstrap initialization
+            if (ApplicationConfig.Delay.Value > 0)
+            {
+                int milliseconds = ApplicationConfig.Delay.Value * 1000;
+                Thread.Sleep(milliseconds);
+            }
+            
             worlds = new List<World>();
 
             // Pre world creation initialization
             BootstrapInstance.instance = this;
             NetworkStreamReceiveSystem.DriverConstructor = new NetCodeDriverConstructor();
             // Deployment world handles both requesting and answering configuration requests
-            if (ApplicationConfig.GetRemoteConfig || ApplicationConfig.ImportDeploymentConfig is not null)
+            if (ApplicationConfig.GetRemoteConfig || ApplicationConfig.ImportDeploymentConfig.Value is not null)
             {
                 deploymentWorld = SetupDeploymentServiceWorld();
                 // Create connection listen/connect request in deployment world
@@ -148,18 +157,17 @@ namespace PolkaDOTS.Bootstrap
 
         public void SetupWorldsFromLocalConfig()
         {
-            //SetBootStrapConfig(ApplicationConfig.ServerUrl, ApplicationConfig.ServerPort);
             NativeList<WorldUnmanaged> newWorlds = new NativeList<WorldUnmanaged>(Allocator.Temp);
             SetupWorlds(ApplicationConfig.MultiplayStreamingRole, ApplicationConfig.PlayType, ref newWorlds,
-                ApplicationConfig.NumThinClientPlayers, autoStart: true, autoConnect: true, ApplicationConfig.ServerUrl, (ushort)ApplicationConfig.ServerPort, ApplicationConfig.SignalingUrl);
+                ApplicationConfig.NumSimulatedPlayers, autoStart: true, autoConnect: true, ApplicationConfig.ServerUrl, (ushort)ApplicationConfig.ServerPort, ApplicationConfig.SignalingUrl);
         }
-        
+
         
         /// <summary>
         /// Sets up bootstrapping details and creates local worlds
         /// </summary>
         public void SetupWorlds(MultiplayStreamingRoles mRole, BootstrapPlayTypes playTypes, ref NativeList<WorldUnmanaged> worldReferences,
-            int numThinClients, bool autoStart, bool autoConnect, string serverUrl, ushort serverPort, string signalingUrl, string worldName = "")
+            int numSimulatedClients, bool autoStart, bool autoConnect, string serverUrl, ushort serverPort, string signalingUrl, string worldName = "")
         {
 
             Debug.Log($"Setting up worlds with playType {playTypes} and streaming role {mRole}");
@@ -177,7 +185,7 @@ namespace PolkaDOTS.Bootstrap
             }
             
             //Client
-            if (playTypes == BootstrapPlayTypes.Client || playTypes == BootstrapPlayTypes.ClientAndServer)
+            if (playTypes is BootstrapPlayTypes.Client or BootstrapPlayTypes.ClientAndServer)
             {
                 // Streamed client
                 if (mRole == MultiplayStreamingRoles.Guest)
@@ -193,16 +201,16 @@ namespace PolkaDOTS.Bootstrap
             }
             
 
-            // Thin client
-            if (playTypes == BootstrapPlayTypes.ThinClient && numThinClients > 0)
+            // Simulated client
+            if (playTypes == BootstrapPlayTypes.SimulatedClient && numSimulatedClients > 0)
             {
-                var world = CreateThinClientWorlds(numThinClients, worldName);
+                var world = CreateSimulatedClientWorlds(numSimulatedClients, worldName);
                 newWorlds.AddRange(world);
                 
             }
 
             // Server
-            if (playTypes == BootstrapPlayTypes.Server || playTypes == BootstrapPlayTypes.ClientAndServer)
+            if (playTypes is BootstrapPlayTypes.Server or BootstrapPlayTypes.ClientAndServer)
             {
                 var world = CreateDefaultServerWorld(worldName);
                 newWorlds.Add(world);
@@ -249,7 +257,7 @@ namespace PolkaDOTS.Bootstrap
             {
                 // Client worlds
                 if (playTypes is BootstrapPlayTypes.Client or BootstrapPlayTypes.ClientAndServer 
-                    && world.IsClient() && !world.IsThinClient() && !world.IsStreamedClient())
+                    && world.IsClient() && !world.IsSimulatedClient() && !world.IsStreamedClient())
                 {
                     SetWorldToUpdating(world);
                 }
@@ -260,8 +268,8 @@ namespace PolkaDOTS.Bootstrap
                 {
                     SetWorldToUpdating(world);
                 }
-                // Thin client worlds
-                if (playTypes == BootstrapPlayTypes.ThinClient && world.IsThinClient())
+                // Simulated client worlds
+                if (playTypes == BootstrapPlayTypes.SimulatedClient && world.IsSimulatedClient())
                 {
                     SetWorldToUpdating(world);
                 }
@@ -291,7 +299,7 @@ namespace PolkaDOTS.Bootstrap
             {
                 // Client worlds
                 if (playTypes is BootstrapPlayTypes.Client or BootstrapPlayTypes.ClientAndServer 
-                    && world.IsClient() && !world.IsThinClient() && !world.IsStreamedClient()
+                    && world.IsClient() && !world.IsSimulatedClient() && !world.IsStreamedClient()
                     && mRole != MultiplayStreamingRoles.Guest)
                 {
                     Entity connReq = world.EntityManager.CreateEntity();
@@ -312,8 +320,8 @@ namespace PolkaDOTS.Bootstrap
                     world.EntityManager.AddComponentData(connReq,
                         new StreamedClientRequestConnect{ url = new FixedString512Bytes(signalingUrl) });
                 }
-                // Thin client worlds
-                if (playTypes == BootstrapPlayTypes.ThinClient && world.IsThinClient())
+                // Simulated client worlds
+                if (playTypes == BootstrapPlayTypes.SimulatedClient && world.IsSimulatedClient())
                 {
                     Entity connReq = world.EntityManager.CreateEntity();
                     NetworkEndpoint.TryParse(serverUrl,serverPort,
@@ -387,29 +395,32 @@ namespace PolkaDOTS.Bootstrap
         }
         
         
-        public static List<World> CreateThinClientWorlds(int numThinClients, string worldName)
+        public static List<World> CreateSimulatedClientWorlds(int numSimulatedClients, string worldName)
         {
             List<World> newWorlds = new List<World>();
             
-            var thinClientSystems = DefaultWorldInitialization.GetAllSystems(WorldSystemFilterFlags.ThinClientSimulation);
+            // Re-use Netcode for Entities ThinClient systems
+            //var thinClientSystems = DefaultWorldInitialization.GetAllSystems(WorldSystemFilterFlags.ThinClientSimulation);
+            var thinClientSystems = DefaultWorldInitialization.GetAllSystems(WorldSystemFilterFlags.ClientSimulation);
             
             // Disable the default NetCode world configuration
             var filteredThinClientSystems = new List<Type>();
             foreach (var system in thinClientSystems)
             {
-                if(system.Name == "ConfigureThinClientWorldSystem" || system.Name == "ConfigureClientWorldSystem")
+                if(system.Name is "ConfigureThinClientWorldSystem" or "ConfigureClientWorldSystem")
                     continue;
                 filteredThinClientSystems.Add(system);
             }
             
-            //if(autoConnect)
-            //    filteredThinClientSystems.Add(typeof(CustomAutoconnectSystem));
 
             if (worldName == "")
-                worldName = "ThinClientWorld_";
-            for (var i = 0; i < numThinClients; i++)
+                worldName = "SimulatedClientWorld_";
+            for (var i = 0; i < numSimulatedClients; i++)
             {
-                newWorlds.Add(CreateClientWorld(worldName+$"{i}", WorldFlags.GameThinClient, filteredThinClientSystems));
+                var w = CreateClientWorld(worldName + $"{ApplicationConfig.UserID.Value + i}",
+                    (WorldFlags)WorldFlagsExtension.SimulatedClient, filteredThinClientSystems);
+                w.ID = ApplicationConfig.UserID.Value + i;
+                newWorlds.Add(w);
             }
 
             return newWorlds;
@@ -524,9 +535,9 @@ namespace PolkaDOTS.Bootstrap
             StreamClient=3,
             GuestClient=3,
             /// <summary>
-            /// Minimal client for running player emulation with no frontend, useful for experiments and debugging
+            /// Minimal client for running player emulation/simulated with no frontend, useful for experiments and debugging
             /// </summary>
-            ThinClient = 4
+            SimulatedClient = 4
         }
     }
     

@@ -33,6 +33,11 @@ namespace PolkaDOTS.Multiplay
                 .WithAll<NetworkId, NetworkStreamInGame>();
             _connQuery = GetEntityQuery(builder);
             initialized = false;
+            
+            if (World.Unmanaged.IsSimulatedClient())
+                Enabled = false;
+            
+            
         }
         
         protected override void OnUpdate()
@@ -61,7 +66,7 @@ namespace PolkaDOTS.Multiplay
                     // Run initialization after connection to server made
                     if (!initialized)
                     {
-                        if (World.Unmanaged.IsClient() && !World.Unmanaged.IsHostClient())
+                        if (World.Unmanaged.IsClient() && !World.Unmanaged.IsHostClient() && !World.Unmanaged.IsSimulatedClient())
                         {
                             multiplay.SetUpLocalPlayer();
                             Enabled = false;
@@ -73,6 +78,10 @@ namespace PolkaDOTS.Multiplay
                         }
 
                         initialized = true;
+                    }
+                    else
+                    {
+                        Enabled = false;
                     }
                 }
             }

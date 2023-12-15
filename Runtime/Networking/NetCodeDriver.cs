@@ -19,6 +19,8 @@ namespace PolkaDOTS.Networking
                 disconnectTimeoutMS: s_DisconnectTimeout,
                 heartbeatTimeoutMS: s_DisconnectTimeout / 2,
                 fixedFrameTimeMS: 0,
+                receiveQueueCapacity: 1024,
+                sendQueueCapacity: 1024,
                 maxFrameTimeMS: maxFrameTime);
             settings.WithReliableStageParameters(windowSize: 32)
                 .WithFragmentationStageParameters(payloadCapacity: 16 * 1024);

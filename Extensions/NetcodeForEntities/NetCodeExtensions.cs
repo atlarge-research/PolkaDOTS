@@ -44,13 +44,38 @@ namespace Unity.NetCode
         /// </summary>
         DeploymentClient = 1 << 14 | WorldFlags.GameClient,
         DeploymentServer = 1 << 15 | WorldFlags.GameServer,
+        SimulatedClient = 1 << 16 | WorldFlags.GameClient
     }
+    
+    
     
     /// <summary>
     /// Netcode specific extension methods for additional worlds.
     /// </summary>
     public static class WorldExtensions
     {
+        /// <summary>
+        /// Check if a world is a simulated client.
+        /// </summary>
+        /// <param name="world">A <see cref="World"/> instance</param>
+        /// <returns></returns>
+        public static bool IsSimulatedClient(this WorldUnmanaged world)
+        {
+            return ((WorldFlagsExtension)world.Flags & WorldFlagsExtension.SimulatedClient) == WorldFlagsExtension.SimulatedClient;
+        }
+        
+        /// <summary>
+        /// Check if a world is a simulated client.
+        /// </summary>
+        /// <param name="world">A <see cref="World"/> instance</param>
+        /// <returns></returns>
+        public static bool IsSimulatedClient(this World world)
+        {
+            return ((WorldFlagsExtension)world.Flags & WorldFlagsExtension.SimulatedClient) == WorldFlagsExtension.SimulatedClient;
+        }
+
+        
+        
         /// <summary>
         /// Check if a world is a host client.
         /// </summary>
@@ -186,7 +211,7 @@ namespace Unity.NetCode
                 ++ClientServerBootstrap.WorldCounts.Data.serverWorlds;
             }
 
-            if (state.World.IsClient())
+            if (state.World.IsClient() && !state.World.IsSimulatedClient())
             {
                 var simulationGroup = state.World.GetExistingSystemManaged<SimulationSystemGroup>();
                 simulationGroup.RateManager = new NetcodeClientRateManager(simulationGroup);
@@ -197,11 +222,13 @@ namespace Unity.NetCode
                 ++ClientServerBootstrap.WorldCounts.Data.clientWorlds;
             }
 
-            if (state.World.IsThinClient())
+            if (state.World.IsSimulatedClient())
             {
                 var simulationGroup = state.World.GetExistingSystemManaged<SimulationSystemGroup>();
                 simulationGroup.RateManager = new NetcodeClientRateManager(simulationGroup);
-                // No prediction on thin client
+                
+                var predictionGroup = state.World.GetExistingSystemManaged<PredictedSimulationSystemGroup>();
+                predictionGroup.SetRateManagerCreateAllocator(new NetcodeClientPredictionRateManager(predictionGroup));
                 
                 ++ClientServerBootstrap.WorldCounts.Data.clientWorlds;
             }
@@ -215,7 +242,7 @@ namespace Unity.NetCode
                 --ClientServerBootstrap.WorldCounts.Data.serverWorlds;
             }
 
-            if (state.World.IsClient() || state.World.IsThinClient())
+            if (state.World.IsClient() || state.World.IsSimulatedClient())
             {
                 --ClientServerBootstrap.WorldCounts.Data.clientWorlds;
             }

@@ -413,7 +413,7 @@ namespace PolkaDOTS.Deployment
         {
             foreach (var world in newWorlds)
             {
-                if ((world.IsClient() || world.IsServer() || world.IsThinClient()) && !world.IsStreamedClient())
+                if ((world.IsClient() || world.IsServer() || world.IsSimulatedClient()) && !world.IsStreamedClient())
                 {
                     Entity e = ecb.CreateEntity();
                     ecb.AddComponent(e, new LoadAuthoringSceneRequest{world = world});
@@ -439,8 +439,8 @@ namespace PolkaDOTS.Deployment
                 playTypes = GameBootstrap.BootstrapPlayTypes.Client;
             if (cRPC.worldType == WorldTypes.Server)
                 playTypes = GameBootstrap.BootstrapPlayTypes.Server;
-            if (cRPC.worldType == WorldTypes.ThinClient)
-                playTypes = GameBootstrap.BootstrapPlayTypes.ThinClient;
+            if (cRPC.worldType == WorldTypes.SimulatedClient)
+                playTypes = GameBootstrap.BootstrapPlayTypes.SimulatedClient;
 
             bool create = (ConfigRPCActions.Create & cRPC.action) == ConfigRPCActions.Create;
             bool start = (ConfigRPCActions.Start & cRPC.action) == ConfigRPCActions.Start;

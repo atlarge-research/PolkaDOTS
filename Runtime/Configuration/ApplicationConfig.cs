@@ -32,7 +32,8 @@ namespace PolkaDOTS
         public static readonly CommandLineParser.IntArgument TakeScreenshotsInterval = new CommandLineParser.IntArgument("-screenshotInterval", 5);
         public static readonly CommandLineParser.FilePathArgument ScreenshotFolder = new CommandLineParser.FilePathArgument("-screenshotFolder", Application.persistentDataPath + "/screenshots");
         public static readonly CommandLineParser.IntArgument Duration = new CommandLineParser.IntArgument("-duration", -1);
-        public static readonly CommandLineParser.IntArgument UserID = new CommandLineParser.IntArgument("-userID", -1);
+        public static readonly CommandLineParser.IntArgument Delay = new CommandLineParser.IntArgument("-startDelay", 0);
+        public static readonly CommandLineParser.IntArgument UserID = new CommandLineParser.IntArgument("-userID", 0);
         
         // ================== SIGNALING ==================
         public static readonly CommandLineParser.StringArgument SignalingUrl = new CommandLineParser.StringArgument("-signalingUrl", "ws://127.0.0.1:7981");
@@ -52,7 +53,7 @@ namespace PolkaDOTS
         // ================== EMULATION ==================
         public static readonly CommandLineParser.EnumArgument<EmulationType> EmulationType = new CommandLineParser.EnumArgument<EmulationType>("-emulationType", Deployment.EmulationType.None);
         public static readonly CommandLineParser.FilePathArgument EmulationFile = new CommandLineParser.FilePathArgument("-emulationFile", Application.persistentDataPath + '\\' + "recordedInputs.inputtrace");
-        public static readonly CommandLineParser.IntArgument NumThinClientPlayers = new CommandLineParser.IntArgument("-numThinClientPlayers", 0);
+        public static readonly CommandLineParser.IntArgument NumSimulatedPlayers = new CommandLineParser.IntArgument("-numSimulatedPlayers", 1);
         
         // ================== STATISTICS ==================
         public static readonly CommandLineParser.FlagArgument LogStats = new CommandLineParser.FlagArgument("-logStats", false);

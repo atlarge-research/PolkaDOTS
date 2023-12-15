@@ -58,7 +58,7 @@ namespace PolkaDOTS.Deployment
     {
         None       = 0,
         Client     = 1,
-        ThinClient = 1 << 1,
+        SimulatedClient = 1 << 1,
         Server     = 1 << 2
         
     }
