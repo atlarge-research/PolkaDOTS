@@ -36,6 +36,7 @@ namespace PolkaDOTS.Bootstrap
         // TODO use dict<str worldName, World world>
         public List<World> worlds;
         private World deploymentWorld;
+        private List<Type> _uniqueSystemTypes;
         public bool Initialize(string defaultWorldName)
         {
             // Get the global command line reader class
@@ -53,7 +54,8 @@ namespace PolkaDOTS.Bootstrap
             }
             
             worlds = new List<World>();
-
+            _uniqueSystemTypes = new List<Type>();
+            
             // Pre world creation initialization
             BootstrapInstance.instance = this;
             NetworkStreamReceiveSystem.DriverConstructor = new NetCodeDriverConstructor();
@@ -204,8 +206,8 @@ namespace PolkaDOTS.Bootstrap
             // Simulated client
             if (playTypes == BootstrapPlayTypes.SimulatedClient && numSimulatedClients > 0)
             {
-                var world = CreateSimulatedClientWorlds(numSimulatedClients, worldName);
-                newWorlds.AddRange(world);
+                var worldList = CreateSimulatedClientWorlds(numSimulatedClients, worldName);
+                newWorlds.AddRange(worldList);
                 
             }
 
@@ -344,7 +346,7 @@ namespace PolkaDOTS.Bootstrap
             }
         }
         
-        public static World CreateDefaultClientWorld(string worldName, bool isHost = false, bool isCloudHost = false)
+        public World CreateDefaultClientWorld(string worldName, bool isHost = false, bool isCloudHost = false)
         {
             WorldSystemFilterFlags flags = WorldSystemFilterFlags.ClientSimulation |
                                            WorldSystemFilterFlags.Presentation;
@@ -360,6 +362,13 @@ namespace PolkaDOTS.Bootstrap
             {
                 if(system.Name == "ConfigureThinClientWorldSystem" || system.Name == "ConfigureClientWorldSystem")
                     continue;
+                if (system.IsDefined(typeof(UniqueSystemAttribute), false))
+                {
+                    Debug.Log($"Adding type with UniqueSystemAttribute: {system.Name}");
+                    if (_uniqueSystemTypes.Contains(system))
+                        continue;
+                    _uniqueSystemTypes.Add(system);
+                }
                 filteredClientSystems.Add(system);
             }
             
@@ -386,16 +395,27 @@ namespace PolkaDOTS.Bootstrap
                 
         }
 
-        public static World CreateStreamedClientWorld(string worldName)
+        public World CreateStreamedClientWorld(string worldName)
         {
             var systems = new List<Type> { typeof(MultiplayInitSystem), typeof(EmulationInitSystem), typeof(TakeScreenshotSystem), typeof(UpdateWorldTimeSystem), typeof(StopWorldSystem) };
+            var filteredClientSystems = new List<Type>();
+            foreach (var system in systems )
+            {
+                if (system.IsDefined(typeof(UniqueSystemAttribute), false))
+                {
+                    if (_uniqueSystemTypes.Contains(system))
+                        continue;
+                    _uniqueSystemTypes.Add(system);
+                }
+                filteredClientSystems.Add(system);
+            }
             if (worldName == "")
                 worldName = "StreamingGuestWorld";
-            return CreateClientWorld(worldName, (WorldFlags)WorldFlagsExtension.StreamedClient, systems);
+            return CreateClientWorld(worldName, (WorldFlags)WorldFlagsExtension.StreamedClient, filteredClientSystems);
         }
         
         
-        public static List<World> CreateSimulatedClientWorlds(int numSimulatedClients, string worldName)
+        public List<World> CreateSimulatedClientWorlds(int numSimulatedClients, string worldName)
         {
             List<World> newWorlds = new List<World>();
             
@@ -405,11 +425,21 @@ namespace PolkaDOTS.Bootstrap
             
             // Disable the default NetCode world configuration
             var filteredThinClientSystems = new List<Type>();
+            var filteredThinClientSystemsWithUnique = new List<Type>();
             foreach (var system in thinClientSystems)
             {
                 if(system.Name is "ConfigureThinClientWorldSystem" or "ConfigureClientWorldSystem")
                     continue;
+                if (system.IsDefined(typeof(UniqueSystemAttribute), false))
+                {
+                    if (_uniqueSystemTypes.Contains(system))
+                        continue;
+                    _uniqueSystemTypes.Add(system);
+                    filteredThinClientSystemsWithUnique.Add(system);
+                    continue;
+                }
                 filteredThinClientSystems.Add(system);
+                filteredThinClientSystemsWithUnique.Add(system);
             }
             
 
@@ -417,16 +447,30 @@ namespace PolkaDOTS.Bootstrap
                 worldName = "SimulatedClientWorld_";
             for (var i = 0; i < numSimulatedClients; i++)
             {
+                List<Type> systems;
+                if (i == 0)
+                {
+                    // Only add unique systems to the first world
+                    systems = filteredThinClientSystemsWithUnique;
+                }
+                else
+                {
+                    systems = filteredThinClientSystems;
+                }
                 var w = CreateClientWorld(worldName + $"{ApplicationConfig.UserID.Value + i}",
-                    (WorldFlags)WorldFlagsExtension.SimulatedClient, filteredThinClientSystems);
+                    (WorldFlags)WorldFlagsExtension.SimulatedClient, systems);
                 w.ID = ApplicationConfig.UserID.Value + i;
+                // Add delay 
+                var e = w.EntityManager.CreateEntity();
+                w.EntityManager.AddComponentData(e, new StartGameStreamDelay{delay = ApplicationConfig.SimulatedJoinInterval.Value * i });
+                
                 newWorlds.Add(w);
             }
 
             return newWorlds;
         }
 
-        public static World CreateDefaultServerWorld(string worldName)
+        public World CreateDefaultServerWorld(string worldName)
         {
             // todo: specify what systems in the server world
             var serverSystems = DefaultWorldInitialization.GetAllSystems(WorldSystemFilterFlags.ServerSimulation);
@@ -436,6 +480,12 @@ namespace PolkaDOTS.Bootstrap
             {
                 if(system.Name == "ConfigureServerWorldSystem")
                     continue;
+                if (system.IsDefined(typeof(UniqueSystemAttribute), false))
+                {
+                    if (_uniqueSystemTypes.Contains(system))
+                        continue;
+                    _uniqueSystemTypes.Add(system);
+                }
                 filteredServerSystems.Add(system);
             }
 
@@ -451,7 +501,7 @@ namespace PolkaDOTS.Bootstrap
         /// <param name="flags">WorldFlags for the created world</param>
         /// <param name="systems">List of systems the world will include</param>
         /// <returns></returns>
-        public static World CreateClientWorld(string name, WorldFlags flags, IReadOnlyList<Type> systems)
+        public World CreateClientWorld(string name, WorldFlags flags, IReadOnlyList<Type> systems)
         {
             var world = new World(name, flags);
 
@@ -471,7 +521,7 @@ namespace PolkaDOTS.Bootstrap
         /// </summary>
         /// <param name="name">The server world name</param>
         /// <returns></returns>
-        public static World CreateServerWorld(string name, WorldFlags flags, IReadOnlyList<Type> systems)
+        public World CreateServerWorld(string name, WorldFlags flags, IReadOnlyList<Type> systems)
         {
             var world = new World(name, flags);
             
@@ -537,7 +587,12 @@ namespace PolkaDOTS.Bootstrap
             /// <summary>
             /// Minimal client for running player emulation/simulated with no frontend, useful for experiments and debugging
             /// </summary>
-            SimulatedClient = 4
+            SimulatedClient = 4,
+            SimulateClient = 4,
+            SimulationClient = 4,
+            SimulatedClients = 4,
+            SimulateClients = 4,
+            SimulationClients = 4
         }
     }
     

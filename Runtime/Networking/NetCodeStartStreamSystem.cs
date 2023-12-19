@@ -3,8 +3,6 @@ using Unity.Entities;
 using Unity.NetCode;
 using Unity.Collections;
 using Unity.Mathematics;
-using Unity.Networking.Transport;
-using Unity.Transforms;
 using UnityEngine;
 
 namespace PolkaDOTS.Networking
@@ -12,7 +10,11 @@ namespace PolkaDOTS.Networking
     // RPC request from client to server for game to go "in game" and send game snapshots / inputs
     public struct StartGameStreamRequest : IRpcCommand
     {
-        //public FixedString32Bytes Username;
+    }
+    
+    public struct StartGameStreamDelay: IComponentData
+    {
+        public int delay;
     }
 
     // When client has a connection with network id, tell server to start stream
@@ -21,7 +23,6 @@ namespace PolkaDOTS.Networking
     public partial struct StartGameStreamClientSystem : ISystem
     {
         //private FixedString32Bytes name;
-       
         public void OnCreate(ref SystemState state)
         {
             //state.RequireForUpdate<PlayerSpawner>();
@@ -29,21 +30,32 @@ namespace PolkaDOTS.Networking
                 .WithAll<NetworkId>()
                 .WithNone<NetworkStreamInGame>();
             state.RequireForUpdate(state.GetEntityQuery(builder));
-            
-            //name = state.WorldUnmanaged.IsCloudHostClient() ? $"-1" : $"{ApplicationConfig.UserID}";
-            
+            state.RequireForUpdate<WorldReady>();
+
+            if (state.WorldUnmanaged.IsSimulatedClient())
+            {
+                state.RequireForUpdate<StartGameStreamDelay>();
+            }
         }
 
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
+            
+            if (state.WorldUnmanaged.IsSimulatedClient())
+            {
+                StartGameStreamDelay startGameStreamDelay = SystemAPI.GetSingleton<StartGameStreamDelay>();
+                if (state.WorldUnmanaged.Time.ElapsedTime < startGameStreamDelay.delay)
+                {
+                    return;
+                }
+            }
             var commandBuffer = new EntityCommandBuffer(Allocator.Temp);
             foreach (var (id, entity) in SystemAPI.Query<RefRO<NetworkId>>().WithEntityAccess()
                          .WithNone<NetworkStreamInGame>())
             {
                 commandBuffer.AddComponent<NetworkStreamInGame>(entity);
                 var req = commandBuffer.CreateEntity();
-                //commandBuffer.AddComponent(req, new StartGameStreamRequest{Username = name});
                 commandBuffer.AddComponent(req, new StartGameStreamRequest());
                 Debug.Log($"Sending start game stream RPC");
                 commandBuffer.AddComponent(req, new SendRpcCommandRequest { TargetConnection = entity });

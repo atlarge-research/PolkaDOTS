@@ -100,6 +100,7 @@ namespace PolkaDOTS.Deployment
             
             authoringScenes.Dispose();
             EntityManager.DestroyEntity(authoringSceneQuery);
+            Enabled = false;
         }
     }
 

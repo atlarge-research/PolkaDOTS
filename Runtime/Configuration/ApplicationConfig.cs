@@ -54,6 +54,7 @@ namespace PolkaDOTS
         public static readonly CommandLineParser.EnumArgument<EmulationType> EmulationType = new CommandLineParser.EnumArgument<EmulationType>("-emulationType", Deployment.EmulationType.None);
         public static readonly CommandLineParser.FilePathArgument EmulationFile = new CommandLineParser.FilePathArgument("-emulationFile", Application.persistentDataPath + '\\' + "recordedInputs.inputtrace");
         public static readonly CommandLineParser.IntArgument NumSimulatedPlayers = new CommandLineParser.IntArgument("-numSimulatedPlayers", 1);
+        public static readonly CommandLineParser.IntArgument SimulatedJoinInterval = new CommandLineParser.IntArgument("-simulatedJoinInterval", 0);
         
         // ================== STATISTICS ==================
         public static readonly CommandLineParser.FlagArgument LogStats = new CommandLineParser.FlagArgument("-logStats", false);

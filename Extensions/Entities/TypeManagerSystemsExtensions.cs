@@ -9,6 +9,9 @@ namespace Unity.Entities
     static public unsafe partial class TypeManager
     {
         
+        /// <summary>
+        /// Returns all Unity systems
+        /// </summary>
         public static NativeList<SystemTypeIndex> GetUnitySystemsTypeIndices(
             WorldSystemFilterFlags filterFlags = WorldSystemFilterFlags.All,
             WorldSystemFilterFlags requiredFlags = 0)

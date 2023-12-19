@@ -9,10 +9,11 @@ using Unity.Profiling.Editor;
 namespace PolkaDOTS.Statistics
 {
     /// <summary>
-    /// Collects performance metrics
+    /// Collects network performance metrics
     /// </summary>
     [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation | WorldSystemFilterFlags.ClientSimulation)]
     [UpdateAfter(typeof(NetworkReceiveSystemGroup))]
+    [UniqueSystem]
     public partial struct StatisticsSystem : ISystem
     {
         
@@ -39,12 +40,6 @@ namespace PolkaDOTS.Statistics
         
         public void OnUpdate(ref SystemState state)
         {
-            // Record terrain area data
-            //var terrainCount = _terrainAreaQuery.CalculateEntityCount();
-            //if (state.WorldUnmanaged.IsClient())
-            //    GameStatistics.NumTerrainAreasClient.Value = terrainCount;
-            //if(state.WorldUnmanaged.IsServer())
-            //    GameStatistics.NumTerrainAreasServer.Value = terrainCount;
             
             // NetCode statistics
             if (SystemAPI.TryGetSingletonEntity<GhostMetricsMonitor>(out var entity))

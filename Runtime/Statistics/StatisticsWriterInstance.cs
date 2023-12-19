@@ -24,7 +24,7 @@ namespace PolkaDOTS.Statistics
 
             if (File.Exists(ApplicationConfig.StatsFilePath)){
                 // Don't overwrite existing data
-                Debug.Log($"Stats file {ApplicationConfig.StatsFilePath} already exists. Ignoring -logStats.");
+                Debug.Log($"Stats file {ApplicationConfig.StatsFilePath.Value} already exists. Ignoring -logStats.");
                 return;
             }
 

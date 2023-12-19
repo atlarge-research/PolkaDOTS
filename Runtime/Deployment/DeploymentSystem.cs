@@ -181,14 +181,15 @@ namespace PolkaDOTS.Deployment
                         res = commandBuffer.CreateEntity();
                     }
                 }
-                // Check if all nodes connected
-                _allNodesConnected = _deploymentGraph.CheckAllNodesConnected();
-                if (_allNodesConnected && double.IsNaN(_startTime))
-                {
-                    _startTime = World.Time.ElapsedTime;
-                }
                 // Destroy the request
                 commandBuffer.DestroyEntity(reqEntity);
+            }
+            
+            // Check if all nodes connected
+            _allNodesConnected = _deploymentGraph.CheckAllNodesConnected();
+            if (_allNodesConnected && double.IsNaN(_startTime))
+            {
+                _startTime = World.Time.ElapsedTime;
             }
             
             // Handle received configuration error RPC
@@ -200,6 +201,14 @@ namespace PolkaDOTS.Deployment
                 commandBuffer.DestroyEntity(reqEntity);
             }
             
+            // Handle timing events
+            double elapsed = World.Time.ElapsedTime - _startTime;
+            if (elapsed > ApplicationConfig.Duration)
+            {
+                Debug.Log($"[{DateTime.Now.TimeOfDay}]: Experiment duration of {ApplicationConfig.Duration.Value} seconds elapsed! Exiting.");
+                BootstrapInstance.instance.ExitGame();
+            }
+            
             // Handle experiment control events
             for (int experimentID = 0; experimentID < _deploymentGraph.ExperimentActionList.Count; experimentID++)
             {
@@ -208,12 +217,6 @@ namespace PolkaDOTS.Deployment
                     break;
                 
                 var experimentAction = _deploymentGraph.ExperimentActionList[experimentID];
-                double elapsed = World.Time.ElapsedTime - _startTime;
-                if (elapsed > ApplicationConfig.Duration)
-                {
-                    Debug.Log($"[{DateTime.Now.TimeOfDay}]: Experiment duration of {ApplicationConfig.Duration} seconds elapsed! Exiting.");
-                    BootstrapInstance.instance.ExitGame();
-                }
                 if (elapsed > experimentAction.delay && !experimentAction.done)
                 {
                     var nodeActions = experimentAction.deploymentNodeActions;
