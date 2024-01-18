@@ -9,7 +9,7 @@ namespace PolkaDOTS.Networking
     public class NetCodeDriverConstructor : INetworkStreamDriverConstructor
     {
         // Custom timeout time
-        private static readonly int s_DisconnectTimeout = 4000;
+        private static readonly int s_DisconnectTimeout = 6000;
 
         private NetworkSettings CreateNetworkSettings(int maxFrameTime = 0)
         {

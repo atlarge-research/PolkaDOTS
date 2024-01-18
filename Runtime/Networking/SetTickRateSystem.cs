@@ -14,17 +14,42 @@ namespace PolkaDOTS.Networking
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ThinClientSimulation | WorldSystemFilterFlags.ServerSimulation)]
     [UpdateInGroup(typeof(InitializationSystemGroup))]
     [BurstCompile]
-    public partial class SetTickRateSystem : SystemBase
+    public partial class SetServerClientNetworkSettingsSystem : SystemBase
     {
         protected override void OnCreate()
         {
             // Create and set a singleton component with the tick rate parameters.
             ClientServerTickRate cst = new ClientServerTickRate {
                 NetworkTickRate = ApplicationConfig.NetworkTickRate,
-                SimulationTickRate = ApplicationConfig.SimulationTickRate
+                SimulationTickRate = ApplicationConfig.SimulationTickRate,
+                MaxSimulationStepsPerFrame = ApplicationConfig.MaxSimulationStepsPerFrame,
+                MaxSimulationStepBatchSize = ApplicationConfig.MaxSimulationStepBatchSize,
+                SendSnapshotsForCatchUpTicks = false
             };
             cst.ResolveDefaults();
             EntityManager.CreateSingleton<ClientServerTickRate>(cst,"ClientServerTickRateSingleton");
+            Enabled = false;
+        }
+
+        protected override void OnUpdate()
+        { }
+    }
+    
+    /// <summary>
+    /// Initializes Netcode for Entities (NFE) by creating a <see cref="ClientTickRate"/> singleton.
+    /// </summary>
+    [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ThinClientSimulation)]
+    [UpdateInGroup(typeof(InitializationSystemGroup))]
+    [BurstCompile]
+    public partial class SetClientNetworkSettingsSystem : SystemBase
+    {
+        protected override void OnCreate()
+        {
+            // Create and set a singleton component with the tick rate parameters.
+            ClientTickRate ctr = NetworkTimeSystem.DefaultClientTickRate;
+            ctr.MaxPredictAheadTimeMS = (uint) ApplicationConfig.MaxPredictAheadTimeMS.Value;
+            //ctr.ResolveDefaults();
+            EntityManager.CreateSingleton<ClientTickRate>(ctr,"ClientTickRateSingleton");
             Enabled = false;
         }
 

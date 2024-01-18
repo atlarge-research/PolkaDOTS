@@ -16,6 +16,11 @@ namespace PolkaDOTS
         [GhostField] public FixedString32Bytes Username;
         public BlobAssetReference<BlobString> multiplayConnectionID;
     }
+
+    // Marks this player as actively controlled by a connected player
+    public struct PlayerInGame : IComponentData, IEnableableComponent
+    {
+    }
     
     // Marks this player entity as freshly instantiated
     public struct NewPlayer : IComponentData, IEnableableComponent
