@@ -33,6 +33,9 @@ namespace PolkaDOTS.Multiplay.MultiplayStats
 
         private void Awake()
         {
+            scrollView.gameObject.SetActive(false);
+            // Fix for any annoying console popup message
+            Debug.developerConsoleVisible = false;
             //showStatsButton.onClick.AddListener(ShowStats);
             //hideStatsButton.onClick.AddListener(HideStats);
         }
@@ -71,7 +74,9 @@ namespace PolkaDOTS.Multiplay.MultiplayStats
             {
                 return;
             }
-
+            
+            scrollView.gameObject.SetActive(true);
+            
             signalingHandlerList.Add(handlerBase);
         }
         

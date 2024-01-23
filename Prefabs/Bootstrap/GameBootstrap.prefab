@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &8602242385816674794
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4500616911380405583}
+  - component: {fileID: 3243556258562715456}
+  - component: {fileID: 9077543739387041978}
+  m_Layer: 0
+  m_Name: GameBootstrap
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4500616911380405583
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8602242385816674794}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3243556258562715456
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8602242385816674794}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7670ed7fdc2d435abe14606c6942102a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  editorArgs: 
+  useDeploymentConfig: 0
+  deploymentConfig: "{\n\t\"nodes\":[\n\t\t{\n\t\t\t\"nodeID\":0,\n\t\t\t\"nodeIP\":\"\",\n\t\t\t\"worldConfigs\":[\n\t\t\t\t{\n\t\t\t\t\t\"worldName\":
+    \"GameServer\",\n\t\t\t\t\t\"worldType\":\"Server\",\n\t\t\t\t\t\"initializationMode\":\"Connect\",\n\t\t\t\t\t\"multiplayStreamingRoles\":\"Disabled\",\n\t\t\t\t\t\"serverNodeID\":0,\n\t\t\t\t\t\"streamingNodeID\":-1,\n\t\t\t\t\t\"numThinClients\":0,\n\t\t\t\t\t\"services\":[],\n\t\t\t\t\t\"serviceFilterType\":\"Includes\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"worldName\":
+    \"CloudHostClient\",\n\t\t\t\t\t\"worldType\":\"Client\",\n\t\t\t\t\t\"initializationMode\":\"Start\",\n\t\t\t\t\t\"multiplayStreamingRoles\":\"CloudHost\",\n\t\t\t\t\t\"serverNodeID\":0,\n\t\t\t\t\t\"streamingNodeID\":0,\n\t\t\t\t\t\"numThinClients\":0,\n\t\t\t\t\t\"services\":[],\n\t\t\t\t\t\"serviceFilterType\":\"Includes\"\n\t\t\t\t}\n\t\t\t]\n\t\t},\n\t\t{\n\t\t\t\"nodeID\":1,\n\t\t\t\"nodeIP\":\"\",\n\t\t\t\"worldConfigs\":[\n\t\t\t\t{\n\t\t\t\t\t\"worldName\":
+    \"GameClient\",\n\t\t\t\t\t\"worldType\":\"Client\",\n\t\t\t\t\t\"initializationMode\":\"Connect\",\n\t\t\t\t\t\"multiplayStreamingRoles\":\"Disabled\",\n\t\t\t\t\t\"serverNodeID\":0,\n\t\t\t\t\t\"streamingNodeID\":-1,\n\t\t\t\t\t\"numThinClients\":0,\n\t\t\t\t\t\"services\":[],\n\t\t\t\t\t\"serviceFilterType\":\"Includes\"\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"worldName\":
+    \"StreamedClient\",\n\t\t\t\t\t\"worldType\":\"Client\",\n\t\t\t\t\t\"initializationMode\":\"Create\",\n\t\t\t\t\t\"multiplayStreamingRoles\":\"Guest\",\n\t\t\t\t\t\"serverNodeID\":-1,\n\t\t\t\t\t\"streamingNodeID\":0,\n\t\t\t\t\t\"numThinClients\":0,\n\t\t\t\t\t\"services\":[],\n\t\t\t\t\t\"serviceFilterType\":\"Includes\"\n\t\t\t\t}\n\t\t\t]\n\t\t}\n\t],\n\t\"experimentActions\":[\n\t\t{\n\t\t\t\"delay\":
+    15,\n\t\t\t\"actions\": [\n\t\t\t\t{\n\t\t\t\t\t\"nodeID\": 1,\n\t\t\t\t\t\"worldNames\":
+    [\"GameClient\", \"StreamedClient\"],\n\t\t\t\t\t\"actions\": [\"Stop\", \"Connect\"]\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"nodeID\":
+    0,\n\t\t\t\t\t\"worldNames\": [\"CloudHostClient\"],\n\t\t\t\t\t\"actions\":
+    [\"Connect\"]\n\t\t\t\t}\n\t\t\t]\n\t\t}\n\t]\n}"
+--- !u!114 &9077543739387041978
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8602242385816674794}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f24193842324400097dc31e8a94f65b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

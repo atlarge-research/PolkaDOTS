@@ -206,7 +206,7 @@ namespace PolkaDOTS.Multiplay
 
         IEnumerator ConnectGuest()
         {
-            var connectionId = $"{ApplicationConfig.UserID}";//Guid.NewGuid().ToString("N");
+            var connectionId = $"{ApplicationConfig.UserID.Value}";//Guid.NewGuid().ToString("N");
             var guestPlayer = Instantiate(guestPrefab);
             var handler = guestPlayer.GetComponent<SingleConnection>();
             statsUI.AddSignalingHandler(handler);
@@ -251,7 +251,7 @@ namespace PolkaDOTS.Multiplay
         {
             if (guestConnected)
             {
-                currentHandler.DeleteConnection($"{ApplicationConfig.UserID}");
+                currentHandler.DeleteConnection($"{ApplicationConfig.UserID.Value}");
             }
             else
             {

@@ -40,13 +40,13 @@ namespace PolkaDOTS.Emulation
         {
             if (inputRecorder.replayIsRunning)
             {
-                Debug.Log($"Resuming input playback from {ApplicationConfig.EmulationFile}");
+                Debug.Log($"Resuming input playback from {ApplicationConfig.EmulationFile.Value}");
                 Play();
                 return;
             }
             try
             {
-                inputRecorder.LoadCaptureFromFile(ApplicationConfig.EmulationFile);
+                inputRecorder.LoadCaptureFromFile(ApplicationConfig.EmulationFile.Value);
             }
             catch (Exception ex)
             {
@@ -54,7 +54,7 @@ namespace PolkaDOTS.Emulation
                 Debug.LogError(ex.ToString());
                 return;
             } 
-            Debug.Log($"Starting input playback from {ApplicationConfig.EmulationFile}");
+            Debug.Log($"Starting input playback from {ApplicationConfig.EmulationFile.Value}");
             inputRecorder.StartReplay();
         }
         
@@ -69,9 +69,9 @@ namespace PolkaDOTS.Emulation
         {
             if ((emulationType & EmulationType.Record) == EmulationType.Record)
             {
-                Debug.Log($"Saving capture file to {ApplicationConfig.EmulationFile}");
+                Debug.Log($"Saving capture file to {ApplicationConfig.EmulationFile.Value}");
                 inputRecorder.StopCapture();
-                inputRecorder.SaveCaptureToFile(ApplicationConfig.EmulationFile);
+                inputRecorder.SaveCaptureToFile(ApplicationConfig.EmulationFile.Value);
             }
 
             if ((emulationType & EmulationType.Playback) == EmulationType.Playback)

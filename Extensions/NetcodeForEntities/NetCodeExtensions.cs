@@ -211,27 +211,18 @@ namespace Unity.NetCode
                 ++ClientServerBootstrap.WorldCounts.Data.serverWorlds;
             }
 
-            if (state.World.IsClient() && !state.World.IsSimulatedClient())
-            {
-                var simulationGroup = state.World.GetExistingSystemManaged<SimulationSystemGroup>();
-                simulationGroup.RateManager = new NetcodeClientRateManager(simulationGroup);
-
-                var predictionGroup = state.World.GetExistingSystemManaged<PredictedSimulationSystemGroup>();
-                predictionGroup.SetRateManagerCreateAllocator(new NetcodeClientPredictionRateManager(predictionGroup));
-
-                ++ClientServerBootstrap.WorldCounts.Data.clientWorlds;
-            }
-
-            if (state.World.IsSimulatedClient())
+            if (state.World.IsClient())
             {
                 var simulationGroup = state.World.GetExistingSystemManaged<SimulationSystemGroup>();
                 simulationGroup.RateManager = new NetcodeClientRateManager(simulationGroup);
                 
                 var predictionGroup = state.World.GetExistingSystemManaged<PredictedSimulationSystemGroup>();
                 predictionGroup.SetRateManagerCreateAllocator(new NetcodeClientPredictionRateManager(predictionGroup));
-                
+           
+
                 ++ClientServerBootstrap.WorldCounts.Data.clientWorlds;
             }
+
             state.Enabled = false;
         }
         

@@ -504,7 +504,7 @@ namespace PolkaDOTS.Bootstrap
         public World CreateClientWorld(string name, WorldFlags flags, IReadOnlyList<Type> systems)
         {
             var world = new World(name, flags);
-
+    
             DefaultWorldInitialization.AddSystemsToRootLevelSystemGroups(world, systems);
             
 

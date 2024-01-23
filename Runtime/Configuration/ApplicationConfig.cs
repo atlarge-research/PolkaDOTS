@@ -24,6 +24,7 @@ namespace PolkaDOTS
         public static readonly CommandLineParser.IntArgument MaxSimulationStepsPerFrame = new CommandLineParser.IntArgument("-maxSimulationStepsPerFrame", 4);
         public static readonly CommandLineParser.IntArgument MaxSimulationStepBatchSize = new CommandLineParser.IntArgument("-maxSimulationStepBatchSize", 4);
         public static readonly CommandLineParser.IntArgument MaxPredictAheadTimeMS = new CommandLineParser.IntArgument("-maxPredictAheadTimeMS", 250);
+        public static readonly CommandLineParser.FlagArgument DisablePrediction = new CommandLineParser.FlagArgument("-disablePrediction", false);
         
         // ================== APPLICATION ==================
         public static readonly CommandLineParser.FlagArgument NoGraphics = new CommandLineParser.FlagArgument("-nographics", false);
