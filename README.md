@@ -86,3 +86,15 @@ public class GameProfilerModule : ProfilerModule
 }
 ```
 </details>
+
+### Entity Subscenes
+PolkaDOTS modifies ECS entity world management, and removes the assumption that entity worlds will be run immediately
+when created. It is thus necessary to modify ECS subscene loading so they are loaded when needed. Therefore,
+to load a subscene, create a new subscene that contains only the [SceneLoader.cs](./Runtime/Deployment/SceneLoader.cs)
+script, and in its `Scene` field set your original subscene. The [SceneLoader.cs](./Runtime/Deployment/SceneLoader.cs) will
+either automatically load your subscene when the world is loaded, or be loaded by the `DeploymentWorld` when using
+`RemoteConfig`. 
+
+If your game has logic that depends on these subscenes being loaded before running, an easy way to check is to
+add the [WorldReadyAuthoring](./Extensions/NetcodeForEntities/WorldReadyAuthoring.cs) script to your subscene. This will
+add an entity with the `WorldReady` component to the world when the subscene is loaded.
