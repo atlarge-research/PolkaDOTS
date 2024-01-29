@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using PolkaDOTS.Configuration;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.NetCode;
 using Unity.Networking.Transport;
-using Unity.VisualScripting;
 using UnityEngine;
 using WebSocketSharp;
 
@@ -125,7 +122,8 @@ namespace PolkaDOTS.Deployment
                     
                     cRPC.worldType = worldConfig.worldType;
                     cRPC.multiplayStreamingRoles = worldConfig.multiplayStreamingRoles;
-                    
+                    cRPC.numSimulatedClients = worldConfig.numSimulatedClients;
+                        
                     if (worldConfig.serverNodeID == node.id)
                         cRPC.serverIP = "127.0.0.1";
                     else
@@ -134,7 +132,7 @@ namespace PolkaDOTS.Deployment
                         var serverNode = Nodes[worldConfig.serverNodeID];
                         // If that node is the one this system is running on, tell the remote to use our ip
                         FixedString64Bytes endpoint = serverNode.endpoint;
-                        if (worldConfig.serverNodeID == ApplicationConfig.DeploymentID && node.id != ApplicationConfig.DeploymentID )
+                        if (worldConfig.serverNodeID == ApplicationConfig.DeploymentID.Value && node.id != ApplicationConfig.DeploymentID.Value )
                             endpoint = "source";
                         cRPC.serverIP = endpoint;
                     }

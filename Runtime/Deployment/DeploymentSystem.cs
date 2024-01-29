@@ -46,14 +46,16 @@ namespace PolkaDOTS.Deployment
         //  Multiplay streaming host/guest
         public FixedString64Bytes signallingIP;
         
-        public int numThinClients;
+        public int numSimulatedClients;
         
+        // todo
         // Names of server service Types, handled according to serviceFilterType
         // public string[] services;
         // How the service names are handled when instantiating this world
         // public ServiceFilterType serviceFilterType;
+        
         // The player emulation behaviour to use on a client world
-        //public EmulationType emulationType;
+        public EmulationType emulationType;
 
         /*public override string ToString() =>
             $"[nodeID: { nodeID};  worldTypes: {(WorldTypes)worldTypes}; numThinClients: {numThinClients};" +
@@ -203,7 +205,7 @@ namespace PolkaDOTS.Deployment
             
             // Handle timing events
             double elapsed = World.Time.ElapsedTime - _startTime;
-            if (elapsed > ApplicationConfig.Duration)
+            if (ApplicationConfig.Duration > 0 && elapsed > ApplicationConfig.Duration)
             {
                 Debug.Log($"[{DateTime.Now.TimeOfDay}]: Experiment duration of {ApplicationConfig.Duration.Value} seconds elapsed! Exiting.");
                 BootstrapInstance.instance.ExitGame();
@@ -404,7 +406,7 @@ namespace PolkaDOTS.Deployment
             
             commandBuffer.Playback(EntityManager);
 
-            if (_configReceived && (World.Time.ElapsedTime - _startTime) > ApplicationConfig.Duration)
+            if (ApplicationConfig.Duration > 0 && _configReceived && (World.Time.ElapsedTime - _startTime) > ApplicationConfig.Duration)
             {
                 Debug.Log($"[{DateTime.Now.TimeOfDay}]: Experiment duration of {ApplicationConfig.Duration} seconds elapsed! Exiting.");
                 BootstrapInstance.instance.ExitGame();
@@ -454,26 +456,24 @@ namespace PolkaDOTS.Deployment
             {
                 string addr = sourceConn.WithPort(0).ToString();
                 cRPC.serverIP = addr.Substring(0, addr.Length - 2);
-                // todo remove this
                 if (cRPC.serverIP == "127.0.0.1")
                 {
-                    cRPC.serverIP = new FixedString64Bytes(ApplicationConfig.ServerUrl);
+                    cRPC.serverIP = new FixedString64Bytes(ApplicationConfig.ServerUrl.Value);
                 }
             }
             if (cRPC.signallingIP == "source")
             {
                 string addr = sourceConn.WithPort(0).ToString();
                 cRPC.signallingIP  = addr.Substring(0, addr.Length - 2);
-                // todo remove this
                 if (cRPC.signallingIP  == "127.0.0.1")
                 {
-                    cRPC.serverIP = new FixedString64Bytes(ApplicationConfig.SignalingUrl);
+                    cRPC.signallingIP = new FixedString64Bytes(ApplicationConfig.SignalingUrl.Value);
                 }
             }
             
             if (create)
             {
-                BootstrapInstance.instance.SetupWorlds(cRPC.multiplayStreamingRoles, playTypes, ref newWorlds, cRPC.numThinClients,
+                BootstrapInstance.instance.SetupWorlds(cRPC.multiplayStreamingRoles, playTypes, ref newWorlds, cRPC.numSimulatedClients,
                     autoStart: start, autoConnect: connect,cRPC.serverIP.ToString(), cRPC.serverPort,cRPC.signallingIP.ToString(), cRPC.worldName.ToString());
             } else if (start)
             {

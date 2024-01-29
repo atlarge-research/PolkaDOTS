@@ -118,7 +118,7 @@ namespace PolkaDOTS.Deployment
         // The ID of the node that this world (if it is a streamed client) will connect to. Can be this node, but why would you do that?
         public int streamingNodeID;
         // The number of simulated clients to create and connect. Only valid if worldType is SimulatedClient
-        public int numSimulatedClient;
+        public int numSimulatedClients;
         // Names of server service Types, handled according to serviceFilterType
         public string[] services;
         // How the service names are handled when instantiating this world
@@ -128,6 +128,6 @@ namespace PolkaDOTS.Deployment
         
         public override string ToString() =>
             $"[worldType: {worldType}; multiplayStreamingRoles: {multiplayStreamingRoles}; serverNodeID: {serverNodeID}; streamingNodeID: {streamingNodeID};" +
-            $"numSimulatedClients: {numSimulatedClient}; services: {services}; serviceFilterType: {serviceFilterType}; emulationType: {emulationType}; ]";
+            $"numSimulatedClients: {numSimulatedClients}; services: {services}; serviceFilterType: {serviceFilterType}; emulationType: {emulationType}; ]";
     }
 }

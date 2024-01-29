@@ -3,6 +3,7 @@ using PolkaDOTS.Multiplay;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
+using Unity.Networking.Transport;
 using UnityEngine;
 
 namespace PolkaDOTS.Emulation
@@ -24,7 +25,6 @@ namespace PolkaDOTS.Emulation
 
         protected override void OnUpdate()
         {
-            // todo use coroutines
             Emulation emulation = EmulationSingleton.Instance;
             Multiplay.Multiplay multiplay = MultiplaySingleton.Instance;
             if (emulation is null || multiplay is null)
@@ -37,6 +37,10 @@ namespace PolkaDOTS.Emulation
             Enabled = false;
 
             emulation.emulationType = ApplicationConfig.EmulationType;
+            if (World.Unmanaged.IsSimulatedClient())
+            {
+                emulation.emulationType = EmulationType.Simulation;
+            }
             Debug.Log($"Emulation type is {emulation.emulationType}");
             
             // Multiplay guest emulation only supports input playback

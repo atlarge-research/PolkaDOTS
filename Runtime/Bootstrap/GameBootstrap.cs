@@ -419,7 +419,7 @@ namespace PolkaDOTS.Bootstrap
         {
             List<World> newWorlds = new List<World>();
             
-            // Re-use Netcode for Entities ThinClient systems
+            // Re-use Netcode for EntitiesSim ThinClient systems
             //var thinClientSystems = DefaultWorldInitialization.GetAllSystems(WorldSystemFilterFlags.ThinClientSimulation);
             var thinClientSystems = DefaultWorldInitialization.GetAllSystems(WorldSystemFilterFlags.ClientSimulation);
             
