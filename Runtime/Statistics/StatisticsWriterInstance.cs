@@ -123,8 +123,15 @@ namespace PolkaDOTS.Statistics
             foreach (var (_, rec) in recorders)
                 sb.Append($"{rec.LastValue.ToString()};");
             sb.Append("\n");
-            metricsBuffer += sb.ToString();
-
+#if PLATFORM_ANDROID || UNITY_EDITOR
+            if(ApplicationConfig.LogStats)
+            {
+                Debug.Log($"[STATISTIC]{sb.ToString()}");
+            }
+#else
+                metricsBuffer += sb.ToString();
+#endif
+            
         }
 
         public void WriteStatisticsBuffer()

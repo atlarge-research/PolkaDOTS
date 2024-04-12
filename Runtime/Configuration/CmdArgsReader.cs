@@ -9,6 +9,10 @@ using Unity.NetCode;
 using UnityEngine;
 using WebSocketSharp;
 using Random = UnityEngine.Random;
+using System.IO;
+#if PLATFORM_ANDROID
+using UnityEngine.Android;
+#endif
 
 #if UNITY_EDITOR
 using ParrelSync;
@@ -19,9 +23,19 @@ namespace PolkaDOTS.Configuration
 {
     public static class CmdArgsReader
     {
+        [Serializable]
+        private class CmdArgsJson
+        {
+            public string[] args = new string[0];
+        }
 #if UNITY_EDITOR
         private static EditorCmdArgs editorArgs;
+
 #endif
+
+        [SerializeField]
+        private static string argjsonFileName = "cmdArgs";
+
         // Returns the string array of cmd line arguments from environment, ParrelSync, or an editor GameObject
         private static string[] GetCommandlineArgs()
         {
@@ -38,14 +52,28 @@ namespace PolkaDOTS.Configuration
             {
                 // Otherwise, use arguments in editor MonoBehaviour 
                 args = editorArgs.editorArgs.Split(' ');
+                //args = getArgsFromJson();
             }
 #else
             // Read from normal command line application arguments
             args = Environment.GetCommandLineArgs();
+            if(args.Length == 1){
+                args = getArgsFromJson();
+            }
 #endif
+            Debug.Log($"running with arguments: {args.ToString()}");
             return args;
         }
-        
+
+        private static string[] getArgsFromJson()
+        {
+            TextAsset jsonTxt = Resources.Load<TextAsset>(argjsonFileName);
+            Debug.Log($"[CONFIG:] Found arg json: {jsonTxt}");
+            CmdArgsJson argsObj = JsonConvert.DeserializeObject<CmdArgsJson>(jsonTxt.text);
+            Debug.Log($"[CONFIG:] Found args: {argsObj.args}");
+            return argsObj.args;
+        }
+
         public static bool ParseCmdArgs()
         {
             var arguments = GetCommandlineArgs();
