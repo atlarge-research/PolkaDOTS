@@ -16,7 +16,7 @@ namespace PolkaDOTS.Statistics
     [UniqueSystem]
     public partial struct StatisticsSystem : ISystem
     {
-        
+#if UNITY_EDITOR || NETCODE_DEBUG
         public void OnCreate(ref SystemState state)
         {
             
@@ -73,6 +73,7 @@ namespace PolkaDOTS.Statistics
             }
             
         }
+#endif
     }
     
      /// <summary>

@@ -9,6 +9,10 @@ using Unity.NetCode;
 using UnityEngine;
 using WebSocketSharp;
 using Random = UnityEngine.Random;
+using System.IO;
+#if PLATFORM_ANDROID
+using UnityEngine.Android;
+#endif
 
 #if UNITY_EDITOR
 using ParrelSync;
@@ -19,9 +23,19 @@ namespace PolkaDOTS.Configuration
 {
     public static class CmdArgsReader
     {
+        [Serializable]
+        private class CmdArgsJson
+        {
+            public string[] args = new string[0];
+        }
 #if UNITY_EDITOR
         private static EditorCmdArgs editorArgs;
+
 #endif
+
+        [SerializeField]
+        private static string argjsonFileName = "cmdArgs";
+
         // Returns the string array of cmd line arguments from environment, ParrelSync, or an editor GameObject
         private static string[] GetCommandlineArgs()
         {
@@ -37,15 +51,73 @@ namespace PolkaDOTS.Configuration
             else
             {
                 // Otherwise, use arguments in editor MonoBehaviour 
-                args = editorArgs.editorArgs.Split(' ');
+                //args = editorArgs.editorArgs.Split(' ');
+                args = getArgsFromJson();
             }
 #else
             // Read from normal command line application arguments
             args = Environment.GetCommandLineArgs();
+            if(args.Length == 1){
+                args = getArgsFromJson();
+            }
 #endif
+            Debug.Log($"running with arguments: {args.ToString()}");
             return args;
         }
-        
+
+        private static string[] getArgsFromJson()
+        {
+            /**
+#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+            var pathSeperator = "\\";
+#else
+            var pathSeperator = "/";
+#endif
+            var jsonFilePath = "/storage/emulated/0/Download" + pathSeperator + argjsonFileName;
+            Debug.Log($"path seperator: {Path.PathSeparator} dirseperator: {Path.DirectorySeparatorChar}");
+#if PLATFORM_ANDROID
+            permissionGrant = Permission.HasUserAuthorizedPermission(Permission.ExternalStorageRead);
+            PermissionCallbacks callback = new PermissionCallbacks();
+            callback.PermissionGranted += setPermission;
+            while (!permissionGrant)
+            {
+                Permission.RequestUserPermission(Permission.ExternalStorageRead, callback);
+            }
+            Debug.Log("CONTINUEING");
+#endif
+            if (!File.Exists(jsonFilePath))
+            {
+#if PLATFORM_ANDROID
+                Permission.RequestUserPermission(Permission.ExternalStorageWrite);
+#endif
+
+                Debug.Log($"argjson: FILE DOES NOT EXIST {jsonFilePath}");
+                StreamWriter testfile = File.CreateText(jsonFilePath);
+                testfile.Write(Application.persistentDataPath + Path.DirectorySeparatorChar);
+                testfile.Close();
+                return new string[0];
+            }
+
+            StreamReader jsonFile = File.OpenText(jsonFilePath);
+            
+            if (jsonFile != null)
+            {
+                string json = jsonFile.ReadToEnd();
+                Debug.Log($"argjson: FILE FOUND: {json}");
+                CmdArgsJson argsObj = JsonConvert.DeserializeObject<CmdArgsJson>(json);
+                return argsObj.args;
+            }
+            Debug.Log($"file:{argjsonFileName}");
+            return new string[0];
+            **/
+
+            TextAsset jsonTxt = Resources.Load<TextAsset>(argjsonFileName);
+            Debug.Log($"[CONFIG:] Found arg json: {jsonTxt}");
+            CmdArgsJson argsObj = JsonConvert.DeserializeObject<CmdArgsJson>(jsonTxt.text);
+            Debug.Log($"[CONFIG:] Found args: {argsObj.args}");
+            return argsObj.args;
+        }
+
         public static bool ParseCmdArgs()
         {
             var arguments = GetCommandlineArgs();
