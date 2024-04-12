@@ -258,7 +258,26 @@ namespace PolkaDOTS.Configuration
             bool result = TryParseFilePathArgument(arguments, argumentName, out string value, "");
             if (result && !string.IsNullOrEmpty(value))
             {
-                string text = File.ReadAllText(value);
+                string text = "";
+                if (File.Exists(value))
+                {
+                    text = File.ReadAllText(value);
+                }
+                else //If file operation fails, attempt to load it from resources
+                {
+                    Debug.LogWarning($"[CONFIG] json argument file {value} not found, attempting to load from Assets/Resources/{value}");
+                    TextAsset jsonTxt = Resources.Load<TextAsset>(value);
+                    if (jsonTxt != null)
+                    {
+                        text = jsonTxt.text;
+                        Debug.Log($"[CONFIG]json arg found in resources!");
+                    }
+                    else
+                    {
+                        Debug.LogError($"[CONFIG] jsonargument not {value} found");
+                    }
+                }
+
                 try
                 {
                     //argumentValue = JsonUtility.FromJson<T>(text);
@@ -275,30 +294,6 @@ namespace PolkaDOTS.Configuration
             argumentValue = null;
             return result;
         }
-        
-        /*static bool TryParseJsonFileArgumentClass<T>(string[] arguments, string argumentName, out T argumentValue,
-            bool required = false) where T : class
-        {
-            bool result = TryParseFilePathArgument(arguments, argumentName, out string value);
-            if (result && !string.IsNullOrEmpty(value))
-            {
-                string text = File.ReadAllText(value);
-                try
-                {
-                    //argumentValue = JsonUtility.FromJson<T>(text);
-                    argumentValue = JsonConvert.DeserializeObject<T>(text);
-                    return true;
-                }
-                catch (Exception)
-                {
-                    result = false;
-                }
-            }
-            else if (required)
-                result = false;
-            argumentValue = null;
-            return result;
-        }*/
 
         static bool TryParseFilePathArgument(string[] arguments, string argumentName, out string argumentValue, string def)
         {
