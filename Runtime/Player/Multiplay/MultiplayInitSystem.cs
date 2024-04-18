@@ -42,6 +42,7 @@ namespace PolkaDOTS.Multiplay
         
         protected override void OnUpdate()
         {
+
             Multiplay multiplay = MultiplaySingleton.Instance;
             if (multiplay is null)
                 return;
@@ -67,7 +68,7 @@ namespace PolkaDOTS.Multiplay
                     if (!initialized)
                     {
                         if (World.Unmanaged.IsClient() && !World.Unmanaged.IsHostClient() && !World.Unmanaged.IsSimulatedClient())
-                        {
+                        {   
                             multiplay.SetUpLocalPlayer();
                             Enabled = false;
                         }

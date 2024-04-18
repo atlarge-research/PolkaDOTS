@@ -45,6 +45,7 @@ namespace PolkaDOTS.Multiplay
         private MultiplaySettings settings;
         
         private Vector3 initialPosition = new Vector3(0, 40, -4);
+        private const string PLAYERKEY = "LOCALPLAYER";
 
         public void InitSettings()
         {
@@ -151,6 +152,12 @@ namespace PolkaDOTS.Multiplay
         public void SetUpLocalPlayer()
         {
             Debug.Log("Creating local player object");
+
+            if (connectionPlayerObjects.ContainsKey(PLAYERKEY))
+            {
+                Debug.LogWarning("player registered twice :( ");
+                return;
+            }
             Cursor.lockState = CursorLockMode.Locked;
             
             // We need to setup local input devices on local players
@@ -158,8 +165,7 @@ namespace PolkaDOTS.Multiplay
             var playerInput = hostPlayerObj.GetComponent<InputReceiver>();
             playerInput.PerformPairingWithAllLocalDevices();
             
-            
-            connectionPlayerObjects.Add("LOCALPLAYER", hostPlayerObj);
+            connectionPlayerObjects.Add(PLAYERKEY, hostPlayerObj);
 
             currentPlayerObj = hostPlayerObj;
         }

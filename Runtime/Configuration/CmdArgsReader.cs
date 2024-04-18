@@ -151,9 +151,10 @@ namespace PolkaDOTS.Configuration
             //Server port
             int editorServerPort = EditorPrefs.GetInt(s_AutoConnectionPortKey, 7979);
             if (editorServerPort != 0)
-                ApplicationConfig.ServerPort.SetValue(editorServerPort); 
+                ApplicationConfig.ServerPort.SetValue(editorServerPort);
 
             // Override Deployment ApplicationConfig using this MonoBehaviour's attributes
+            Debug.Log(editorArgs);
             if (editorArgs.useDeploymentConfig && !ClonesManager.IsClone())
             {
                 if (editorArgs.deploymentConfig.IsNullOrEmpty())

@@ -91,7 +91,7 @@ namespace PolkaDOTS.Multiplay
             inputMovement = value.ReadValue<Vector2>();
         }
 
-        public void OnLook(InputAction.CallbackContext value)
+        public virtual void OnLook(InputAction.CallbackContext value)
         {
             inputLook = value.ReadValue<Vector2>();
         }
@@ -118,6 +118,11 @@ namespace PolkaDOTS.Multiplay
             {
                 inputSecondaryAction = true;
             }
+        }
+
+        public virtual bool isVRplayer()
+        {
+            return false;
         }
         
         public void OnEscapeAction(InputAction.CallbackContext value)
