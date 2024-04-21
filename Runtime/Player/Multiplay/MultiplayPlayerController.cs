@@ -5,6 +5,7 @@ using Unity.Entities;
 using Unity.RenderStreaming;
 using Unity.Serialization;
 using UnityEditor;
+using Unity.Mathematics;
 
 /*
  * Gathers input from Player GameObject
@@ -14,17 +15,18 @@ namespace PolkaDOTS.Multiplay
     // Collects input either from local devices or a remote input stream using InputActions
     public class MultiplayPlayerController : MonoBehaviour
     {
-        
+
         [SerializeField] InputReceiver playerInput;
         [DontSerialize] public string username;
-        [DontSerialize]public Vector2 inputMovement;
-        [DontSerialize]public Vector2 inputLook;
-        [DontSerialize]public bool inputJump;
-        [DontSerialize]public bool inputPrimaryAction = false;
-        [DontSerialize]public bool inputSecondaryAction = false;
-        [DontSerialize]public bool playerEntityExists;
-        [DontSerialize]public bool playerEntityRequestSent;
-        [DontSerialize]public Entity playerEntity;
+        [DontSerialize] public Vector2 inputMovement;
+        [DontSerialize] public Vector2 inputLook;
+        [DontSerialize] public bool inputJump;
+        [DontSerialize] public bool inputPrimaryAction = false;
+        [DontSerialize] public bool inputSecondaryAction = false;
+        [DontSerialize] public int selectedItem = 1;
+        [DontSerialize] public bool playerEntityExists;
+        [DontSerialize] public bool playerEntityRequestSent;
+        [DontSerialize] public Entity playerEntity;
 
         protected void Awake()
         {
@@ -45,17 +47,17 @@ namespace PolkaDOTS.Multiplay
             switch (change)
             {
                 case InputDeviceChange.Added:
-                {
-                    playerInput.PerformPairingWithDevice(device);
-                    CheckPairedDevices();
-                    return;
-                }
+                    {
+                        playerInput.PerformPairingWithDevice(device);
+                        CheckPairedDevices();
+                        return;
+                    }
                 case InputDeviceChange.Removed:
-                {
-                    playerInput.UnpairDevices(device);
-                    CheckPairedDevices();
-                    return;
-                }
+                    {
+                        playerInput.UnpairDevices(device);
+                        CheckPairedDevices();
+                        return;
+                    }
             }
         }
 
@@ -103,7 +105,7 @@ namespace PolkaDOTS.Multiplay
                 inputJump = true;
             }
         }
-        
+
         public void OnPrimaryAction(InputAction.CallbackContext value)
         {
             if (value.performed)
@@ -111,7 +113,7 @@ namespace PolkaDOTS.Multiplay
                 inputPrimaryAction = true;
             }
         }
-        
+
         public void OnSecondaryAction(InputAction.CallbackContext value)
         {
             if (value.performed)
@@ -119,7 +121,7 @@ namespace PolkaDOTS.Multiplay
                 inputSecondaryAction = true;
             }
         }
-        
+
         public void OnEscapeAction(InputAction.CallbackContext value)
         {
             if (value.performed)
@@ -131,6 +133,26 @@ namespace PolkaDOTS.Multiplay
 #else
                 Application.Quit();
 #endif
+            }
+        }
+
+        public void OnLeftItem(InputAction.CallbackContext value)
+        {
+            if (value.performed)
+            {
+                selectedItem = math.max(selectedItem - 1, 1);
+                Debug.Log($"Selected item: {selectedItem}");
+            }
+        }
+
+        public void OnRightItem(InputAction.CallbackContext value)
+        {
+
+            int maxItems = 7;
+            if (value.performed)
+            {
+                selectedItem = math.min(selectedItem + 1, maxItems);
+                Debug.Log($"Selected item: {selectedItem}");
             }
         }
     }

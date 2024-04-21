@@ -56,6 +56,7 @@ MonoBehaviour:
   inputJump: 0
   inputPrimaryAction: 0
   inputSecondaryAction: 0
+  selectedItem: 0
   playerEntityExists: 0
   playerEntityRequestSent: 0
 --- !u!114 &-3399718007712543476
@@ -205,6 +206,40 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 52bd4c51-0503-4ffb-b405-5a778b3906fc
     m_ActionName: Player Controls/Exit[/Keyboard/escape]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 207901908825964653}
+        m_TargetAssemblyTypeName: PolkaDOTS.Multiplay.MultiplayPlayerController,
+          PolkaDOTS
+        m_MethodName: OnLeftItem
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: beed57c0-e24f-42ba-9a6d-ef10bae29e7d
+    m_ActionName: Player Controls/LeftItem[/Keyboard/1]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 207901908825964653}
+        m_TargetAssemblyTypeName: PolkaDOTS.Multiplay.MultiplayPlayerController,
+          PolkaDOTS
+        m_MethodName: OnRightItem
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 880b5a06-139d-40fc-bd59-67cab59e47a5
+    m_ActionName: Player Controls/RightItem[/Keyboard/2]
   m_DefaultActionMap: Player Controls
 --- !u!20 &3141172503242693401
 Camera:
