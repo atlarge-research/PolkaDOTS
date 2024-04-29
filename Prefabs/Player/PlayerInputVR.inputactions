@@ -3,12 +3,12 @@
     "maps": [
         {
             "name": "Player Controls",
-            "id": "00ff2ea3-cd65-4cf3-8210-1ac18fc7454a",
+            "id": "cb4067f3-a685-4c86-b9ea-46a6eabfada7",
             "actions": [
                 {
                     "name": "Movement",
                     "type": "Value",
-                    "id": "b0abcd70-701c-4af8-a761-4d5295ce4c3f",
+                    "id": "548e32fd-77d1-40e5-8197-32ca56b41bc0",
                     "expectedControlType": "Vector2",
                     "processors": "",
                     "interactions": "",
@@ -17,7 +17,7 @@
                 {
                     "name": "Look",
                     "type": "Value",
-                    "id": "6fd91141-d0bb-4f08-8647-93ec63dbb396",
+                    "id": "8ebbde1f-3044-41bc-bdac-430e0eae1a68",
                     "expectedControlType": "Quaternion",
                     "processors": "",
                     "interactions": "",
@@ -26,7 +26,7 @@
                 {
                     "name": "Jump",
                     "type": "Button",
-                    "id": "f7fbd1c3-9f40-4b86-bfc6-0ae044fc3795",
+                    "id": "10fecf58-9483-40e0-ae20-15c8d01a4288",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "Press",
@@ -35,7 +35,7 @@
                 {
                     "name": "TogglePause",
                     "type": "Button",
-                    "id": "79cb1857-aa09-48dd-bf31-e728aebae8ec",
+                    "id": "a70a208e-b491-4921-b460-a0144030ef2a",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "Press",
@@ -44,7 +44,7 @@
                 {
                     "name": "PrimaryAction",
                     "type": "Button",
-                    "id": "ee40b0d2-08df-4331-850a-e2b28d0727d8",
+                    "id": "3956cd52-8185-41fb-9912-de7c4f0f4020",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -53,7 +53,7 @@
                 {
                     "name": "SecondaryAction",
                     "type": "Button",
-                    "id": "6c086746-4c42-438f-b6b5-767c8aa67304",
+                    "id": "cded7730-b8f6-4797-9655-63d192ed9ee0",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -62,7 +62,7 @@
                 {
                     "name": "Exit",
                     "type": "Button",
-                    "id": "ae5eb4b2-d512-4eff-bf79-4c6f5edd5ad9",
+                    "id": "52bd4c51-0503-4ffb-b405-5a778b3906fc",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -72,41 +72,19 @@
             "bindings": [
                 {
                     "name": "",
-                    "id": "267c7354-9810-4d74-9ebc-0f3bfe9cabf5",
-                    "path": "<XRController>{LeftHand}/thumbstick",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Movement",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "957161e0-79be-4f36-98be-0d42df447ac0",
-                    "path": "<XRController>{LeftHand}/{PrimaryAction}",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Jump",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "0d3b09db-0077-416a-abbc-6774be863ad2",
+                    "id": "48bc601e-db29-4e46-8a0f-3698ec3025a4",
                     "path": "<XRHMD>/deviceRotation",
                     "interactions": "",
-                    "processors": "",
-                    "groups": "",
+                    "processors": "ScaleVector2(x=0.3,y=0.3)",
+                    "groups": "Touchscreen",
                     "action": "Look",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
-                    "id": "256da87b-e5a9-416c-b72b-3cbcc8a79bbf",
-                    "path": "<XRController>{RightHand}/{PrimaryTrigger}",
+                    "id": "a24fee5f-2c51-49f3-be41-c09aa9e8ed71",
+                    "path": "<OculusTouchController>{LeftHand}/primaryButton",
                     "interactions": "Press",
                     "processors": "",
                     "groups": "Keyboard And Mouse",
@@ -116,30 +94,41 @@
                 },
                 {
                     "name": "",
-                    "id": "aa96045c-e925-4194-ac10-023a289929cd",
-                    "path": "<XRController>{RightHand}/{SecondaryTrigger}",
-                    "interactions": "",
+                    "id": "477d91ba-8d21-4cf1-91d2-773df4d2eb77",
+                    "path": "<OculusTouchController>{LeftHand}/secondaryButton",
+                    "interactions": "Press",
                     "processors": "",
-                    "groups": "",
+                    "groups": "Keyboard And Mouse",
                     "action": "SecondaryAction",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
-                    "id": "bf74e272-2e08-4717-bfe6-9253bd422ce8",
-                    "path": "<XRController>{RightHand}/{Menu}",
+                    "id": "87cfda77-d12e-403d-a864-f0584f12f965",
+                    "path": "<XRController>{LeftHand}/primary2DAxis",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Exit",
+                    "action": "Movement",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
-                    "id": "a3c0340e-9705-4687-9ccb-f41ae17b6d6d",
-                    "path": "<XRController>{RightHand}/{SecondaryAction}",
+                    "id": "5aa2e20b-19e4-4b56-9b9d-bc821a528c4a",
+                    "path": "<OculusTouchController>{RightHand}/primaryButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Jump",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "263dbabf-7284-4f19-ad03-9faea0dcfad2",
+                    "path": "<OculusTouchController>{RightHand}/secondaryButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "",

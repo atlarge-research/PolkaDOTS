@@ -88,6 +88,7 @@ namespace PolkaDOTS.Multiplay
 
         public void OnMovement(InputAction.CallbackContext value)
         {
+            Debug.Log("receiving input for movement");
             inputMovement = value.ReadValue<Vector2>();
         }
 
