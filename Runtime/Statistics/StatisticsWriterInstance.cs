@@ -24,7 +24,8 @@ namespace PolkaDOTS.Statistics
 
             if (File.Exists(ApplicationConfig.StatsFilePath)){
                 // Don't overwrite existing data
-                Debug.Log($"Stats file {ApplicationConfig.StatsFilePath.Value} already exists. Ignoring -logStats.");
+                Debug.Log($"Stats file {ApplicationConfig.StatsFilePath.Value} already exists. overwriting -logStats.");
+                File.Delete(ApplicationConfig.StatsFilePath);
                 return;
             }
 
@@ -105,7 +106,14 @@ namespace PolkaDOTS.Statistics
 
         public void AddStatisticRecorder(string name, ProfilerCategory category)
         {
-            recorders.Add(name, ProfilerRecorder.StartNew(category, name));
+            if (!recorders.ContainsKey(name))
+            {
+                recorders.Add(name, ProfilerRecorder.StartNew(category, name));
+            }
+            else
+            {
+                Debug.LogWarning($"key already added {name}");
+            }
         }
 
         private byte[] HeaderToBytes()
@@ -135,7 +143,7 @@ namespace PolkaDOTS.Statistics
                 return;
             }
 
-            Debug.Log("Writing stats to file");
+            Debug.Log($"Writing stats to file: {ApplicationConfig.StatsFilePath.Value}");
             try
             {
                 // Write header
@@ -160,7 +168,12 @@ namespace PolkaDOTS.Statistics
             
             written = true;
         }
-        
+#if UNITY_EDITOR
+        ~StatisticsWriter()
+        {
+            WriteStatisticsBuffer();
+        }
+#endif
     }
     
 
