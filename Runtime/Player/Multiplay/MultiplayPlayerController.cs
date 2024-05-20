@@ -23,7 +23,8 @@ namespace PolkaDOTS.Multiplay
         [DontSerialize] public bool inputJump;
         [DontSerialize] public bool inputPrimaryAction = false;
         [DontSerialize] public bool inputSecondaryAction = false;
-        [DontSerialize] public int selectedItem = 1;
+        [DontSerialize] public int selectedItem;
+        [DontSerialize] public bool inputThirdAction = false;
         [DontSerialize] public bool playerEntityExists;
         [DontSerialize] public bool playerEntityRequestSent;
         [DontSerialize] public Entity playerEntity;
@@ -32,7 +33,9 @@ namespace PolkaDOTS.Multiplay
         {
             playerInput.onDeviceChange += OnDeviceChange;
             username = $"{ApplicationConfig.UserID.Value}";
+            selectedItem = 9;
         }
+
 
         private void OnEnable()
         {
@@ -140,19 +143,26 @@ namespace PolkaDOTS.Multiplay
         {
             if (value.performed)
             {
-                selectedItem = math.max(selectedItem - 1, 1);
+                selectedItem = math.max(selectedItem - 1, 9);
                 Debug.Log($"Selected item: {selectedItem}");
             }
         }
 
         public void OnRightItem(InputAction.CallbackContext value)
         {
-
-            int maxItems = 7;
+            int maxItems = 13;
             if (value.performed)
             {
                 selectedItem = math.min(selectedItem + 1, maxItems);
                 Debug.Log($"Selected item: {selectedItem}");
+            }
+        }
+
+        public void OnThirdAction(InputAction.CallbackContext value)
+        {
+            if (value.performed)
+            {
+                inputThirdAction = true;
             }
         }
     }
