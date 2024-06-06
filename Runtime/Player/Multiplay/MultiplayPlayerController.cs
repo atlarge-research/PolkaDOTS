@@ -6,6 +6,7 @@ using Unity.RenderStreaming;
 using Unity.Serialization;
 using UnityEditor;
 using Unity.Mathematics;
+using System.Collections.Generic;
 
 /*
  * Gathers input from Player GameObject
@@ -28,12 +29,13 @@ namespace PolkaDOTS.Multiplay
         [DontSerialize] public bool playerEntityExists;
         [DontSerialize] public bool playerEntityRequestSent;
         [DontSerialize] public Entity playerEntity;
+        [DontSerialize] public List<int> selectableItems = new List<int> { 9, 10, 12, 1, 2, 3, 4, 5, 6, 7 };
 
         protected void Awake()
         {
             playerInput.onDeviceChange += OnDeviceChange;
             username = $"{ApplicationConfig.UserID.Value}";
-            selectedItem = 9;
+            selectedItem = 0;
         }
 
 
@@ -143,17 +145,16 @@ namespace PolkaDOTS.Multiplay
         {
             if (value.performed)
             {
-                selectedItem = math.max(selectedItem - 1, 9);
+                selectedItem = math.max(selectedItem - 1, 0);
                 Debug.Log($"Selected item: {selectedItem}");
             }
         }
 
         public void OnRightItem(InputAction.CallbackContext value)
         {
-            int maxItems = 13;
             if (value.performed)
             {
-                selectedItem = math.min(selectedItem + 1, maxItems);
+                selectedItem = math.min(selectedItem + 1, selectableItems.Count - 1);
                 Debug.Log($"Selected item: {selectedItem}");
             }
         }
