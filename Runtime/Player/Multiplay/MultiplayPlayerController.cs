@@ -29,7 +29,7 @@ namespace PolkaDOTS.Multiplay
         [DontSerialize] public bool playerEntityExists;
         [DontSerialize] public bool playerEntityRequestSent;
         [DontSerialize] public Entity playerEntity;
-        [DontSerialize] public List<int> selectableItems = new List<int> { 9, 10, 12, 14, 15, 16, 17, 1, 2, 3, 4, 5, 6, 7 };
+        [DontSerialize] public List<int> selectableItems = new List<int> { 15, 16, 17, 18, 19, 1, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 };
 
         protected void Awake()
         {
