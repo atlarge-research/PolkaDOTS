@@ -24,18 +24,18 @@ namespace PolkaDOTS.Multiplay
         [DontSerialize] public bool inputJump;
         [DontSerialize] public bool inputPrimaryAction = false;
         [DontSerialize] public bool inputSecondaryAction = false;
-        [DontSerialize] public int selectedItem;
+        [DontSerialize] public int selectedItemIndex;
         [DontSerialize] public bool inputThirdAction = false;
         [DontSerialize] public bool playerEntityExists;
         [DontSerialize] public bool playerEntityRequestSent;
         [DontSerialize] public Entity playerEntity;
-        [DontSerialize] public List<int> selectableItems = new List<int> { 15, 16, 17, 18, 19, 1, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 };
+        [DontSerialize] public List<int> selectableItems = new List<int> { 16, 17, 19, 1, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 };
 
         protected void Awake()
         {
             playerInput.onDeviceChange += OnDeviceChange;
             username = $"{ApplicationConfig.UserID.Value}";
-            selectedItem = 0;
+            selectedItemIndex = 0;
         }
 
 
@@ -145,8 +145,8 @@ namespace PolkaDOTS.Multiplay
         {
             if (value.performed)
             {
-                selectedItem = math.max(selectedItem - 1, 0);
-                Debug.Log($"Selected item: {selectedItem}");
+                selectedItemIndex = math.max(selectedItemIndex - 1, 0);
+                Debug.Log($"Selected item: {selectedItemIndex}");
             }
         }
 
@@ -154,8 +154,8 @@ namespace PolkaDOTS.Multiplay
         {
             if (value.performed)
             {
-                selectedItem = math.min(selectedItem + 1, selectableItems.Count - 1);
-                Debug.Log($"Selected item: {selectedItem}");
+                selectedItemIndex = math.min(selectedItemIndex + 1, selectableItems.Count - 1);
+                Debug.Log($"Selected item: {selectedItemIndex}");
             }
         }
 
