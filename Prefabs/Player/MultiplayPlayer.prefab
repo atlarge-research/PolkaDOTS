@@ -56,10 +56,11 @@ MonoBehaviour:
   inputJump: 0
   inputPrimaryAction: 0
   inputSecondaryAction: 0
-  selectedItem: 0
+  selectedItemIndex: 0
   inputThirdAction: 0
   playerEntityExists: 0
   playerEntityRequestSent: 0
+  selectableItems: 010000000300000010000000120000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e000000
 --- !u!114 &-3399718007712543476
 MonoBehaviour:
   m_ObjectHideFlags: 0
