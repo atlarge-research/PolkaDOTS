@@ -39,7 +39,10 @@ namespace PolkaDOTS
         public static readonly CommandLineParser.IntArgument Duration = new CommandLineParser.IntArgument("-duration", -1);
         public static readonly CommandLineParser.IntArgument Delay = new CommandLineParser.IntArgument("-startDelay", 0);
         public static readonly CommandLineParser.IntArgument UserID = new CommandLineParser.IntArgument("-userID", 0);
-        
+
+        public static readonly CommandLineParser.IntArgument renderDistance = new CommandLineParser.IntArgument("-renderDist", 10);
+        public static readonly CommandLineParser.FlagArgument playerFly = new CommandLineParser.FlagArgument("-playerFly", false);
+
         
         // ================== MULTIPLAY ==================
         public static readonly CommandLineParser.EnumArgument<MultiplayStreamingRoles> MultiplayStreamingRole = new CommandLineParser.EnumArgument<MultiplayStreamingRoles>("-multiplayRole", MultiplayStreamingRoles.Disabled);
