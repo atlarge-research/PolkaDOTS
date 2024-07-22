@@ -21,7 +21,6 @@ namespace PolkaDOTS.Multiplay
         public void OnLookVR(InputAction.CallbackContext value)
         {
             lookVR = value.ReadValue<Quaternion>();
-            Debug.Log("HMD moved");
         }
     }
 }

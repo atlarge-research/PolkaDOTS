@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using Unity.Profiling;
+using Unity.Profiling.LowLevel.Unsafe;
 using UnityEngine;
 
 
@@ -13,11 +13,31 @@ namespace PolkaDOTS.Statistics
     /// <summary>
     /// Writes key statistics to a csv file
     /// </summary>
+
     // todo this is a (suboptimal) workaround for inability to properly convert profiler .raw files to csv.
     public class StatisticsWriterInstance : MonoBehaviour
     {
         public static StatisticsWriter instance;
         public static bool ready;
+
+        void showAllMarkers()
+        {
+            var availableStatHandles = new List<ProfilerRecorderHandle>();
+            ProfilerRecorderHandle.GetAvailable(availableStatHandles);
+
+            StringBuilder sb = new StringBuilder(availableStatHandles.Count);
+            foreach (ProfilerRecorderHandle item in availableStatHandles)
+            {
+                sb.Append(ProfilerRecorderHandle.GetDescription(item).Name + ",\n");
+            }
+            Debug.Log(sb.ToString());
+
+            using (StreamWriter writer = new StreamWriter("C:/Users/joach/Desktop/markers.txt", true)) //// true to append data to the file
+            {
+                writer.Write(sb.ToString());
+            }
+        }
+
         private void Awake()
         {
             if (!ApplicationConfig.LogStats) {
@@ -33,6 +53,7 @@ namespace PolkaDOTS.Statistics
 
            
             Debug.Log("Creating statistics writer!");
+            //showAllMarkers();
             instance = new StatisticsWriter();
             ready = true;
             
@@ -95,9 +116,10 @@ namespace PolkaDOTS.Statistics
 
             recorders = new Dictionary<string, ProfilerRecorder>();
             written = false;
+
+
             // Add generic metrics
             AddStatisticRecorder("Main Thread", ProfilerCategory.Internal);
-            AddStatisticRecorder("Render Thread", ProfilerCategory.Internal);
             AddStatisticRecorder("PlayerLoop", ProfilerCategory.Internal);
             AddStatisticRecorder("System Used Memory", ProfilerCategory.Memory);
             AddStatisticRecorder("GC Reserved Memory", ProfilerCategory.Memory);
@@ -122,10 +144,16 @@ namespace PolkaDOTS.Statistics
             AddStatisticRecorder("GameServer Opencraft.Player.PlayerMovementSystem", ProfilerCategory.Scripts);
             AddStatisticRecorder("ServerFixedUpdate", ProfilerCategory.Scripts);
             AddStatisticRecorder("SetAreaNeighborsJob (Burst)", ProfilerCategory.Scripts);
+            AddStatisticRecorder("SetAreaNeighborsJob", ProfilerCategory.Scripts);
             AddStatisticRecorder("GhostUpdateSystem:UpdateJob (Burst)", ProfilerCategory.Scripts);
+            AddStatisticRecorder("GhostUpdateJobCustom", ProfilerCategory.Scripts, true);
+            AddStatisticRecorder("GhostUpdateSystem:UpdateJob", ProfilerCategory.Scripts);
             AddStatisticRecorder("Idle", ProfilerCategory.Scripts, true);
             AddStatisticRecorder("OculusRuntime.WaitToBeginFrame", ProfilerCategory.Scripts);
             AddStatisticRecorder("GameClient Unity.Entities.SimulationSystemGroup", ProfilerCategory.Scripts, true);
+            AddStatisticRecorder("GameServer Unity.Entities.SimulationSystemGroup", ProfilerCategory.Scripts, true);
+            AddStatisticRecorder("UnityEngine.CoreModule.dll!::UpdateFunction.Invoke() [Invoke]", ProfilerCategory.Scripts, true);
+            AddStatisticRecorder("PostLateUpdate.FinishFrameRendering", ProfilerCategory.Scripts, true);
 
 
             AddStatisticRecorder("Number of Terrain Areas (Client)", ProfilerCategory.Scripts);
@@ -144,7 +172,8 @@ namespace PolkaDOTS.Statistics
             if (!recorders.ContainsKey(name))
             {
                 ProfilerRecorderOptions opts = ProfilerRecorderOptions.Default | ProfilerRecorderOptions.SumAllSamplesInFrame;
-                opts = opts | (mainThreadOnly ? ProfilerRecorderOptions.None : ProfilerRecorderOptions.CollectOnlyOnCurrentThread);
+                opts = opts | (mainThreadOnly ? ProfilerRecorderOptions.CollectOnlyOnCurrentThread : ProfilerRecorderOptions.None);
+
                 recorders.Add(name, ProfilerRecorder.StartNew(category, name, 1, opts));
             }
             else
