@@ -101,27 +101,17 @@ namespace PolkaDOTS.Statistics
 
             // Server Related
             AddStatisticRecorder("ServerFixedUpdate", ProfilerCategory.Scripts); // Total Server
-            AddStatisticRecorder("GameServer Unity.Entities.SimulationSystemGroup", ProfilerCategory.Scripts);
-            AddStatisticRecorder("GameServer Opencraft.Terrain.TerrainGenerationSystem", ProfilerCategory.Scripts);
-            AddStatisticRecorder("GameServer Opencraft.Terrain.TerrainToSpawn", ProfilerCategory.Scripts);
-            AddStatisticRecorder("GameServer Opencraft.Terrain.TerrainStructuresSystem", ProfilerCategory.Scripts);
+            AddStatisticRecorder("TerrainGeneration", ProfilerCategory.Scripts);
+            AddStatisticRecorder("PlayerTerrainGenCheck", ProfilerCategory.Scripts);
+            AddStatisticRecorder("StructureGeneration", ProfilerCategory.Scripts);
 
-            AddStatisticRecorder("GameServer Opencraft.Terrain.TerrainLogicSystem", ProfilerCategory.Scripts);
+            AddStatisticRecorder("TerrainLogicSystem", ProfilerCategory.Scripts);
             AddStatisticRecorder("GetUpdates", ProfilerCategory.Scripts);
             AddStatisticRecorder("ReevaluatePropagateMarker", ProfilerCategory.Scripts);
             AddStatisticRecorder("PropagateLogicState", ProfilerCategory.Scripts);
             AddStatisticRecorder("CheckGateState", ProfilerCategory.Scripts);
 
-            AddStatisticRecorder("GameServer Opencraft.Statistics.StatisticsSystem", ProfilerCategory.Scripts);
-
-            // Client Related
-            AddStatisticRecorder("GameClient Unity.Entities.SimulationSystemGroup", ProfilerCategory.Scripts);
-
-
-            AddStatisticRecorder("DeploymentWorld Unity.Entities.SimulationSystemGroup", ProfilerCategory.Scripts);
-
-
-
+            AddStatisticRecorder("StatisticsSystem", ProfilerCategory.Scripts);
 
 
             foreach (var (name, recorder) in recorders)
