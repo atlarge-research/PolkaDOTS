@@ -18,21 +18,23 @@ namespace PolkaDOTS.Statistics
         public static bool ready;
         private void Awake()
         {
-            if (!ApplicationConfig.LogStats) {
+            if (!ApplicationConfig.LogStats)
+            {
                 return;
             }
 
-            if (File.Exists(ApplicationConfig.StatsFilePath)){
+            if (File.Exists(ApplicationConfig.StatsFilePath))
+            {
                 // Don't overwrite existing data
                 Debug.Log($"Stats file {ApplicationConfig.StatsFilePath.Value} already exists. Ignoring -logStats.");
                 return;
             }
 
-           
+
             Debug.Log("Creating statistics writer!");
             instance = new StatisticsWriter();
             ready = true;
-            
+
         }
 
         private void OnDisable()
@@ -40,7 +42,7 @@ namespace PolkaDOTS.Statistics
             if (ApplicationConfig.LogStats && ready)
             {
                 // Write statistics before exit
-                if(!instance.written)
+                if (!instance.written)
                     instance.WriteStatisticsBuffer();
             }
 
@@ -62,45 +64,71 @@ namespace PolkaDOTS.Statistics
                 instance.WriteStatisticsBuffer();
             }
         }
-        
+
     }
 
     public class StatisticsWriter
     {
         private Dictionary<string, ProfilerRecorder> recorders;
-        
+
         private string metricsBuffer;
-        
+
         public bool written;
-        
+
         public StatisticsWriter()
         {
             recorders = new Dictionary<string, ProfilerRecorder>();
             written = false;
             // Add generic metrics
-            AddStatisticRecorder("Main Thread", ProfilerCategory.Internal);
+            AddStatisticRecorder("Main Thread", ProfilerCategory.Internal); // Total frame time
             AddStatisticRecorder("System Used Memory", ProfilerCategory.Memory);
             AddStatisticRecorder("GC Reserved Memory", ProfilerCategory.Memory);
             AddStatisticRecorder("Total Reserved Memory", ProfilerCategory.Memory);
-            
-            AddStatisticRecorder("NFE Snapshot Tick", ProfilerCategory.Network);
-            AddStatisticRecorder("NFE Snapshot Size (bits)", ProfilerCategory.Network);
-            AddStatisticRecorder("NFE RTT", ProfilerCategory.Network);
-            AddStatisticRecorder("NFE Jitter", ProfilerCategory.Network);
-            
-            AddStatisticRecorder("Multiplay FPS", ProfilerCategory.Scripts);
-            AddStatisticRecorder("Multiplay BitRate In", ProfilerCategory.Scripts);
-            AddStatisticRecorder("Multiplay BitRate Out", ProfilerCategory.Scripts);
-            AddStatisticRecorder("Multiplay RTT (ms)", ProfilerCategory.Scripts);
-            AddStatisticRecorder("Multiplay PacketLoss", ProfilerCategory.Scripts);
+
+            //AddStatisticRecorder("NFE Snapshot Tick", ProfilerCategory.Network);
+            //AddStatisticRecorder("NFE Snapshot Size (bits)", ProfilerCategory.Network);
+            //AddStatisticRecorder("NFE RTT", ProfilerCategory.Network);
+            //AddStatisticRecorder("NFE Jitter", ProfilerCategory.Network);
+
+            //AddStatisticRecorder("Multiplay FPS", ProfilerCategory.Scripts);
+            //AddStatisticRecorder("Multiplay BitRate In", ProfilerCategory.Scripts);
+            //AddStatisticRecorder("Multiplay BitRate Out", ProfilerCategory.Scripts);
+            //AddStatisticRecorder("Multiplay RTT (ms)", ProfilerCategory.Scripts);
+            //AddStatisticRecorder("Multiplay PacketLoss", ProfilerCategory.Scripts);
+
             //AddStatisticRecorder("Number of Terrain Areas (Client)", ProfilerCategory.Scripts);
             //AddStatisticRecorder("Number of Terrain Areas (Server)", ProfilerCategory.Scripts);
-            
-            /*foreach (var (name, recorder) in recorders)
+
+            // Server Related
+            AddStatisticRecorder("ServerFixedUpdate", ProfilerCategory.Scripts); // Total Server
+            AddStatisticRecorder("GameServer Unity.Entities.SimulationSystemGroup", ProfilerCategory.Scripts);
+            AddStatisticRecorder("GameServer Opencraft.Terrain.TerrainGenerationSystem", ProfilerCategory.Scripts);
+            AddStatisticRecorder("GameServer Opencraft.Terrain.TerrainToSpawn", ProfilerCategory.Scripts);
+            AddStatisticRecorder("GameServer Opencraft.Terrain.TerrainStructuresSystem", ProfilerCategory.Scripts);
+
+            AddStatisticRecorder("GameServer Opencraft.Terrain.TerrainLogicSystem", ProfilerCategory.Scripts);
+            AddStatisticRecorder("GetUpdates", ProfilerCategory.Scripts);
+            AddStatisticRecorder("ReevaluatePropagateMarker", ProfilerCategory.Scripts);
+            AddStatisticRecorder("PropagateLogicState", ProfilerCategory.Scripts);
+            AddStatisticRecorder("CheckGateState", ProfilerCategory.Scripts);
+
+            AddStatisticRecorder("GameServer Opencraft.Statistics.StatisticsSystem", ProfilerCategory.Scripts);
+
+            // Client Related
+            AddStatisticRecorder("GameClient Unity.Entities.SimulationSystemGroup", ProfilerCategory.Scripts);
+
+
+            AddStatisticRecorder("DeploymentWorld Unity.Entities.SimulationSystemGroup", ProfilerCategory.Scripts);
+
+
+
+
+
+            foreach (var (name, recorder) in recorders)
             {
                 if (!recorder.Valid)
-                    Debug.LogWarning($"Recorder [{name}] is invalid!"); 
-            }*/
+                    Debug.LogWarning($"Recorder [{name}] is invalid!");
+            }
         }
 
         public void AddStatisticRecorder(string name, ProfilerCategory category)
@@ -116,7 +144,7 @@ namespace PolkaDOTS.Statistics
             sb.Append("\n");
             return Encoding.ASCII.GetBytes(sb.ToString());
         }
-        
+
         public void Update()
         {
             var sb = new StringBuilder($"{Time.frameCount};");
@@ -146,7 +174,7 @@ namespace PolkaDOTS.Statistics
                         file.Write(HeaderToBytes());
                     }
                 }
-                
+
                 // Write data
                 using (var file = File.Open(ApplicationConfig.StatsFilePath, FileMode.Append))
                 {
@@ -157,11 +185,11 @@ namespace PolkaDOTS.Statistics
             {
                 Debug.LogError($"Failed to write statistics to {ApplicationConfig.StatsFilePath} with exception {e}");
             }
-            
+
             written = true;
         }
-        
+
     }
-    
+
 
 }
