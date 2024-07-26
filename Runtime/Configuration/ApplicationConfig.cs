@@ -17,7 +17,7 @@ namespace PolkaDOTS
         public static readonly CommandLineParser.FlagArgument GetRemoteConfig = new CommandLineParser.FlagArgument("-remoteConfig", false);
         public static readonly CommandLineParser.StringArgument DeploymentURL = new CommandLineParser.StringArgument("-deploymentURL", "127.0.0.1");
         public static readonly CommandLineParser.IntArgument DeploymentPort = new CommandLineParser.IntArgument("-deploymentPort", 7980);
-        
+
         // ================== NETWORKING ==================
         public static readonly CommandLineParser.IntArgument NetworkTickRate = new CommandLineParser.IntArgument("-networkTickRate", 60);
         public static readonly CommandLineParser.IntArgument SimulationTickRate = new CommandLineParser.IntArgument("-simulationTickRate", 60);
@@ -25,7 +25,7 @@ namespace PolkaDOTS
         public static readonly CommandLineParser.IntArgument MaxSimulationStepBatchSize = new CommandLineParser.IntArgument("-maxSimulationStepBatchSize", 4);
         public static readonly CommandLineParser.IntArgument MaxPredictAheadTimeMS = new CommandLineParser.IntArgument("-maxPredictAheadTimeMS", 250);
         public static readonly CommandLineParser.FlagArgument DisablePrediction = new CommandLineParser.FlagArgument("-disablePrediction", false);
-        
+
         // ================== APPLICATION ==================
         public static readonly CommandLineParser.FlagArgument NoGraphics = new CommandLineParser.FlagArgument("-nographics", false);
         public static readonly CommandLineParser.FlagArgument DebugEnabled = new CommandLineParser.FlagArgument("-debug", false);
@@ -39,8 +39,8 @@ namespace PolkaDOTS
         public static readonly CommandLineParser.IntArgument Duration = new CommandLineParser.IntArgument("-duration", -1);
         public static readonly CommandLineParser.IntArgument Delay = new CommandLineParser.IntArgument("-startDelay", 0);
         public static readonly CommandLineParser.IntArgument UserID = new CommandLineParser.IntArgument("-userID", 0);
-        
-        
+
+
         // ================== MULTIPLAY ==================
         public static readonly CommandLineParser.EnumArgument<MultiplayStreamingRoles> MultiplayStreamingRole = new CommandLineParser.EnumArgument<MultiplayStreamingRoles>("-multiplayRole", MultiplayStreamingRoles.Disabled);
         public static readonly CommandLineParser.StringArgument SignalingUrl = new CommandLineParser.StringArgument("-signalingUrl", "ws://127.0.0.1:7981");
@@ -49,18 +49,18 @@ namespace PolkaDOTS
         //internal static readonly CommandLineParser.StringArrayArgument IceServerUrls = new CommandLineParser.StringArrayArgument("-iceServerUrl");
         //internal static readonly CommandLineParser.StringArgument IceServerUsername = new CommandLineParser.StringArgument("-iceServerUsername");
         //internal static readonly CommandLineParser.StringArgument IceServerCredential = new CommandLineParser.StringArgument("-iceServerCredential");
-        
+
         // ================== EMULATION ==================
         public static readonly CommandLineParser.EnumArgument<EmulationType> EmulationType = new CommandLineParser.EnumArgument<EmulationType>("-emulationType", Deployment.EmulationType.None);
         public static readonly CommandLineParser.FilePathArgument EmulationFile = new CommandLineParser.FilePathArgument("-emulationFile", Application.persistentDataPath + '\\' + "recordedInputs.inputtrace");
         public static readonly CommandLineParser.IntArgument NumSimulatedPlayers = new CommandLineParser.IntArgument("-numSimulatedPlayers", 1);
         public static readonly CommandLineParser.IntArgument SimulatedJoinInterval = new CommandLineParser.IntArgument("-simulatedJoinInterval", 0);
-        
+
         // ================== STATISTICS ==================
         public static readonly CommandLineParser.FlagArgument LogStats = new CommandLineParser.FlagArgument("-logStats", false);
         public static readonly CommandLineParser.FilePathArgument StatsFilePath = new CommandLineParser.FilePathArgument("-statsFile", Application.persistentDataPath + '\\' + "stats.csv");
-        
-        
+
+        public static readonly CommandLineParser.FlagArgument ActiveLogic = new CommandLineParser.FlagArgument("-activeLogic", true);
     }
 
 }

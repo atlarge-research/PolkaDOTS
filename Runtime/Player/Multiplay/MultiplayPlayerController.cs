@@ -5,6 +5,8 @@ using Unity.Entities;
 using Unity.RenderStreaming;
 using Unity.Serialization;
 using UnityEditor;
+using Unity.Mathematics;
+using System.Collections.Generic;
 
 /*
  * Gathers input from Player GameObject
@@ -14,23 +16,28 @@ namespace PolkaDOTS.Multiplay
     // Collects input either from local devices or a remote input stream using InputActions
     public class MultiplayPlayerController : MonoBehaviour
     {
-        
+
         [SerializeField] InputReceiver playerInput;
         [DontSerialize] public string username;
-        [DontSerialize]public Vector2 inputMovement;
-        [DontSerialize]public Vector2 inputLook;
-        [DontSerialize]public bool inputJump;
-        [DontSerialize]public bool inputPrimaryAction = false;
-        [DontSerialize]public bool inputSecondaryAction = false;
-        [DontSerialize]public bool playerEntityExists;
-        [DontSerialize]public bool playerEntityRequestSent;
-        [DontSerialize]public Entity playerEntity;
+        [DontSerialize] public Vector2 inputMovement;
+        [DontSerialize] public Vector2 inputLook;
+        [DontSerialize] public bool inputJump;
+        [DontSerialize] public bool inputPrimaryAction = false;
+        [DontSerialize] public bool inputSecondaryAction = false;
+        [DontSerialize] public int selectedItemIndex;
+        [DontSerialize] public bool inputThirdAction = false;
+        [DontSerialize] public bool playerEntityExists;
+        [DontSerialize] public bool playerEntityRequestSent;
+        [DontSerialize] public Entity playerEntity;
+        [DontSerialize] public List<int> selectableItems = new List<int> { 1, 15, 17, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 };
 
         protected void Awake()
         {
             playerInput.onDeviceChange += OnDeviceChange;
             username = $"{ApplicationConfig.UserID.Value}";
+            selectedItemIndex = 0;
         }
+
 
         private void OnEnable()
         {
@@ -45,17 +52,17 @@ namespace PolkaDOTS.Multiplay
             switch (change)
             {
                 case InputDeviceChange.Added:
-                {
-                    playerInput.PerformPairingWithDevice(device);
-                    CheckPairedDevices();
-                    return;
-                }
+                    {
+                        playerInput.PerformPairingWithDevice(device);
+                        CheckPairedDevices();
+                        return;
+                    }
                 case InputDeviceChange.Removed:
-                {
-                    playerInput.UnpairDevices(device);
-                    CheckPairedDevices();
-                    return;
-                }
+                    {
+                        playerInput.UnpairDevices(device);
+                        CheckPairedDevices();
+                        return;
+                    }
             }
         }
 
@@ -103,7 +110,7 @@ namespace PolkaDOTS.Multiplay
                 inputJump = true;
             }
         }
-        
+
         public void OnPrimaryAction(InputAction.CallbackContext value)
         {
             if (value.performed)
@@ -111,7 +118,7 @@ namespace PolkaDOTS.Multiplay
                 inputPrimaryAction = true;
             }
         }
-        
+
         public void OnSecondaryAction(InputAction.CallbackContext value)
         {
             if (value.performed)
@@ -119,7 +126,7 @@ namespace PolkaDOTS.Multiplay
                 inputSecondaryAction = true;
             }
         }
-        
+
         public void OnEscapeAction(InputAction.CallbackContext value)
         {
             if (value.performed)
@@ -131,6 +138,32 @@ namespace PolkaDOTS.Multiplay
 #else
                 Application.Quit();
 #endif
+            }
+        }
+
+        public void OnLeftItem(InputAction.CallbackContext value)
+        {
+            if (value.performed)
+            {
+                selectedItemIndex = math.max(selectedItemIndex - 1, 0);
+                Debug.Log($"Selected item: {selectedItemIndex}");
+            }
+        }
+
+        public void OnRightItem(InputAction.CallbackContext value)
+        {
+            if (value.performed)
+            {
+                selectedItemIndex = math.min(selectedItemIndex + 1, selectableItems.Count - 1);
+                Debug.Log($"Selected item: {selectedItemIndex}");
+            }
+        }
+
+        public void OnThirdAction(InputAction.CallbackContext value)
+        {
+            if (value.performed)
+            {
+                inputThirdAction = true;
             }
         }
     }
