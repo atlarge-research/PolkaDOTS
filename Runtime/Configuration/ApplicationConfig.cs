@@ -61,6 +61,7 @@ namespace PolkaDOTS
         public static readonly CommandLineParser.FilePathArgument StatsFilePath = new CommandLineParser.FilePathArgument("-statsFile", Application.persistentDataPath + '\\' + "stats.csv");
 
         public static readonly CommandLineParser.FlagArgument ActiveLogic = new CommandLineParser.FlagArgument("-activeLogic", true);
-        public static readonly CommandLineParser.IntArgument CircuitChunkRadius = new CommandLineParser.IntArgument("-circuitChunkRadius", 1);
+        public static readonly CommandLineParser.IntArgument CircuitX = new CommandLineParser.IntArgument("-circuitX", 1);
+        public static readonly CommandLineParser.IntArgument CircuitZ = new CommandLineParser.IntArgument("-circuitZ", 1);
     }
 }

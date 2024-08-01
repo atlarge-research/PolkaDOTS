@@ -109,6 +109,8 @@ namespace PolkaDOTS.Statistics
             AddStatisticRecorder("GetUpdates", ProfilerCategory.Scripts);
             AddStatisticRecorder("ReevaluatePropagateMarker", ProfilerCategory.Scripts);
             AddStatisticRecorder("PropagateLogicState", ProfilerCategory.Scripts);
+            AddStatisticRecorder("PropInputBlocks", ProfilerCategory.Scripts);
+            AddStatisticRecorder("PropActiveLogicBlocks", ProfilerCategory.Scripts);
             AddStatisticRecorder("CheckGateState", ProfilerCategory.Scripts);
 
             AddStatisticRecorder("StatisticsSystem", ProfilerCategory.Scripts);
