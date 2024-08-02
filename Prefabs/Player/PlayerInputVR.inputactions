@@ -94,11 +94,33 @@
                 },
                 {
                     "name": "",
+                    "id": "d411e491-96d9-4780-9ff5-6f63226cfc0f",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PrimaryAction",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "477d91ba-8d21-4cf1-91d2-773df4d2eb77",
                     "path": "<OculusTouchController>{LeftHand}/secondaryButton",
                     "interactions": "Press",
                     "processors": "",
                     "groups": "Keyboard And Mouse",
+                    "action": "SecondaryAction",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "170b2e99-8b27-48b2-9dc3-51c822fa6dd1",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
                     "action": "SecondaryAction",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -127,6 +149,17 @@
                 },
                 {
                     "name": "",
+                    "id": "d55950b1-90e8-4757-89c5-71d1ac0f0c67",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Jump",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "263dbabf-7284-4f19-ad03-9faea0dcfad2",
                     "path": "<OculusTouchController>{RightHand}/secondaryButton",
                     "interactions": "",
@@ -135,6 +168,61 @@
                     "action": "TogglePause",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "WASD",
+                    "id": "53fca7a6-5fa5-4ced-93c5-478858c4a0fb",
+                    "path": "2DVector",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Movement",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "up",
+                    "id": "8448efdd-1643-454f-b92c-7ea07c470428",
+                    "path": "<Keyboard>/w",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard And Mouse",
+                    "action": "Movement",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "down",
+                    "id": "1fbff17a-e342-4bb6-9711-99e9e5e29510",
+                    "path": "<Keyboard>/s",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard And Mouse",
+                    "action": "Movement",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "left",
+                    "id": "2e2c48ec-1ac8-412d-aaf3-b34403807e2a",
+                    "path": "<Keyboard>/a",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard And Mouse",
+                    "action": "Movement",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "right",
+                    "id": "6b8bf830-dd22-42d5-a5da-9bd491a188b6",
+                    "path": "<Keyboard>/d",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard And Mouse",
+                    "action": "Movement",
+                    "isComposite": false,
+                    "isPartOfComposite": true
                 }
             ]
         },

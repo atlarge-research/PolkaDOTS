@@ -78,7 +78,15 @@ namespace PolkaDOTS.Emulation
             {
                 inputRecorder.StopReplay();
             }
+            emulationType = EmulationType.Idle;
+        }
+        private void OnDestroy()
+        {
+            OnApplicationQuit();
+        }
+        ~Emulation()
+        {
+            OnApplicationQuit();
         }
     }
-    
 }

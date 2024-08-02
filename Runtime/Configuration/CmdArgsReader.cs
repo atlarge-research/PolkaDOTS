@@ -67,50 +67,6 @@ namespace PolkaDOTS.Configuration
 
         private static string[] getArgsFromJson()
         {
-            /**
-#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
-            var pathSeperator = "\\";
-#else
-            var pathSeperator = "/";
-#endif
-            var jsonFilePath = "/storage/emulated/0/Download" + pathSeperator + argjsonFileName;
-            Debug.Log($"path seperator: {Path.PathSeparator} dirseperator: {Path.DirectorySeparatorChar}");
-#if PLATFORM_ANDROID
-            permissionGrant = Permission.HasUserAuthorizedPermission(Permission.ExternalStorageRead);
-            PermissionCallbacks callback = new PermissionCallbacks();
-            callback.PermissionGranted += setPermission;
-            while (!permissionGrant)
-            {
-                Permission.RequestUserPermission(Permission.ExternalStorageRead, callback);
-            }
-            Debug.Log("CONTINUEING");
-#endif
-            if (!File.Exists(jsonFilePath))
-            {
-#if PLATFORM_ANDROID
-                Permission.RequestUserPermission(Permission.ExternalStorageWrite);
-#endif
-
-                Debug.Log($"argjson: FILE DOES NOT EXIST {jsonFilePath}");
-                StreamWriter testfile = File.CreateText(jsonFilePath);
-                testfile.Write(Application.persistentDataPath + Path.DirectorySeparatorChar);
-                testfile.Close();
-                return new string[0];
-            }
-
-            StreamReader jsonFile = File.OpenText(jsonFilePath);
-            
-            if (jsonFile != null)
-            {
-                string json = jsonFile.ReadToEnd();
-                Debug.Log($"argjson: FILE FOUND: {json}");
-                CmdArgsJson argsObj = JsonConvert.DeserializeObject<CmdArgsJson>(json);
-                return argsObj.args;
-            }
-            Debug.Log($"file:{argjsonFileName}");
-            return new string[0];
-            **/
-
             TextAsset jsonTxt = Resources.Load<TextAsset>(argjsonFileName);
             Debug.Log($"[CONFIG:] Found arg json: {jsonTxt}");
             CmdArgsJson argsObj = JsonConvert.DeserializeObject<CmdArgsJson>(jsonTxt.text);
