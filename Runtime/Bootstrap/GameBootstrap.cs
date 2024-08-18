@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading;
 using PolkaDOTS.Configuration;
 using PolkaDOTS.Debugging;
@@ -9,6 +10,7 @@ using PolkaDOTS.Emulation;
 using PolkaDOTS.Multiplay;
 using PolkaDOTS.Networking;
 using PolkaDOTS.Statistics;
+using Unity.Assertions;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
@@ -305,7 +307,9 @@ namespace PolkaDOTS.Bootstrap
                     && mRole != MultiplayStreamingRoles.Guest)
                 {
                     Entity connReq = world.EntityManager.CreateEntity();
-                    NetworkEndpoint.TryParse(serverUrl, serverPort,
+                    var ips = Dns.GetHostAddresses(serverUrl);
+                    Assert.IsTrue(ips.Length>0);
+                    NetworkEndpoint.TryParse(ips[0].ToString(), serverPort,
                         out NetworkEndpoint gameEndpoint, NetworkFamily.Ipv4);
                     Debug.Log($"Created connection request for {gameEndpoint}");
                     world.EntityManager.AddComponentData(connReq,
@@ -326,7 +330,9 @@ namespace PolkaDOTS.Bootstrap
                 if (playTypes == BootstrapPlayTypes.SimulatedClient && world.IsSimulatedClient())
                 {
                     Entity connReq = world.EntityManager.CreateEntity();
-                    NetworkEndpoint.TryParse(serverUrl,serverPort,
+                    var ips = Dns.GetHostAddresses(serverUrl);
+                    Assert.IsTrue(ips.Length>0);
+                    NetworkEndpoint.TryParse(ips[0].ToString(),serverPort,
                         out NetworkEndpoint gameEndpoint, NetworkFamily.Ipv4);
                     Debug.Log($"Created connection request for {gameEndpoint}");
                     world.EntityManager.AddComponentData(connReq,
