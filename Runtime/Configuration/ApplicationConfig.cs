@@ -59,8 +59,18 @@ namespace PolkaDOTS
         // ================== STATISTICS ==================
         public static readonly CommandLineParser.FlagArgument LogStats = new CommandLineParser.FlagArgument("-logStats", false);
         public static readonly CommandLineParser.FilePathArgument StatsFilePath = new CommandLineParser.FilePathArgument("-statsFile", Application.persistentDataPath + '\\' + "stats.csv");
-        
-        
+
+        public static readonly CommandLineParser.StringArgument StatsHttpUrl =
+            new CommandLineParser.StringArgument("-statsHttpUrl", "");
+
+        /// <summary>
+        /// How often stats are send over HTTP.
+        /// Expressed in seconds.
+        /// Setting this to a higher value means sending more data less frequently.
+        /// </summary>
+        public static readonly CommandLineParser.IntArgument StatsHttpSendInterval =
+            new CommandLineParser.IntArgument("-statsHttpSendInterval", 10);
+
     }
 
 }
