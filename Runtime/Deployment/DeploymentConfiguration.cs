@@ -11,7 +11,7 @@ namespace PolkaDOTS.Deployment
         public JsonDeploymentNode[] nodes;
         public ExperimentAction[] experimentActions;
     }
-    
+
     /// <summary>
     /// Represents a deployment node
     /// </summary>
@@ -22,7 +22,7 @@ namespace PolkaDOTS.Deployment
         public string nodeIP;
         public WorldConfig[] worldConfigs;
     }
-    
+
     /// <summary>
     /// Perform set of experiment actions at a certain time specified by delay
     /// </summary>
@@ -32,7 +32,7 @@ namespace PolkaDOTS.Deployment
         public int delay;
         public NodeAction[] actions;
     }
-    
+
     /// <summary>
     /// Specified set of world actions to perform on node with matching id
     /// </summary>
@@ -43,7 +43,12 @@ namespace PolkaDOTS.Deployment
         public string[] worldNames;
         public WorldAction[] actions;
     }
-    
+
+    /// <summary>
+    /// Encode changes in deployment that can occur while the system is running.
+    ///
+    /// FIXME describe what Stop, Start, and Connect actually mean
+    /// </summary>
     [Serializable]
     public enum WorldAction
     {
@@ -51,18 +56,18 @@ namespace PolkaDOTS.Deployment
         Start,
         Connect,
     }
-    
-        [Flags]
+
+    [Flags]
     [Serializable]
     public enum WorldTypes
     {
-        None       = 0,
-        Client     = 1,
+        None = 0,
+        Client = 1,
         SimulatedClient = 1 << 1,
-        Server     = 1 << 2
-        
+        Server = 1 << 2
+
     }
-    
+
     [Serializable]
     public enum MultiplayStreamingRoles
     {
@@ -71,7 +76,7 @@ namespace PolkaDOTS.Deployment
         CloudHost,
         Guest
     }
-    
+
     [Serializable]
     public enum ServiceFilterType
     {
@@ -79,7 +84,7 @@ namespace PolkaDOTS.Deployment
         Excludes,
         Only,
     }
-    
+
     [Serializable]
     public enum InitializationMode
     {
@@ -87,18 +92,18 @@ namespace PolkaDOTS.Deployment
         Start,
         Connect
     }
-    
+
     [Flags]
     [Serializable]
-    public enum EmulationType :  int
+    public enum EmulationType : int
     {
-        None              = 0,
-        Idle              = 0,
-        Playback          = 1,
-        Simulation        = 1 << 1,
-        Record            = 1 << 2,
+        None = 0,
+        Idle = 0,
+        Playback = 1,
+        Simulation = 1 << 1,
+        Record = 1 << 2,
     }
-    
+
     /// <summary>
     /// Represents a world, each node can contain many worlds.
     /// </summary>
@@ -125,7 +130,7 @@ namespace PolkaDOTS.Deployment
         public ServiceFilterType serviceFilterType;
         // The player emulation behaviour to use on a client world
         public EmulationType emulationType;
-        
+
         public override string ToString() =>
             $"[worldType: {worldType}; multiplayStreamingRoles: {multiplayStreamingRoles}; serverNodeID: {serverNodeID}; streamingNodeID: {streamingNodeID};" +
             $"numSimulatedClients: {numSimulatedClients}; services: {services}; serviceFilterType: {serviceFilterType}; emulationType: {emulationType}; ]";

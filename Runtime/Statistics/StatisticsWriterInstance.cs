@@ -86,7 +86,7 @@ namespace PolkaDOTS.Statistics
         private Task<HttpResponseMessage> _lastPostRequest;
         private string _telegrafHTTPServerURL;
         private static DateTime EPOCH = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-        
+
 
         public StatisticsWriter()
         {
@@ -130,7 +130,7 @@ namespace PolkaDOTS.Statistics
             /*foreach (var (name, recorder) in recorders)
             {
                 if (!recorder.Valid)
-                    Debug.LogWarning($"Recorder [{name}] is invalid!"); 
+                    Debug.LogWarning($"Recorder [{name}] is invalid!");
             }*/
         }
 
@@ -164,7 +164,7 @@ namespace PolkaDOTS.Statistics
         /// This code writes metrics to a string buffer using the
         /// <see href="https://docs.influxdata.com/influxdb/v1/write_protocols/line_protocol_tutorial/">influx line protocol</see>
         /// </para>
-        /// 
+        ///
         /// <para>
         /// Every 10 seconds, it sends the content of the buffer to a running Telegraf instance which should be
         /// configured to run a HTTP Listener v2 plugin.
@@ -196,11 +196,11 @@ namespace PolkaDOTS.Statistics
 
                 var timeSinceEpoch = DateTime.UtcNow - EPOCH;
                 _httpRecordBuffer.AppendLine($" {timeSinceEpoch.Ticks * 100L}");
-                
+
                 var timeSinceLastRequest = DateTime.UtcNow - _timeOfLastPostRequest;
                 int sendIntervalInSeconds = ApplicationConfig.StatsHttpSendInterval;
                 if (timeSinceLastRequest.Seconds > sendIntervalInSeconds &&
-                    (_lastPostRequest is null || _lastPostRequest.IsCompleted))
+                    ( _lastPostRequest is null || _lastPostRequest.IsCompleted ))
                 {
                     var contentString = _httpRecordBuffer.ToString();
                     var req = _httpClient.PostAsync(
@@ -264,8 +264,5 @@ namespace PolkaDOTS.Statistics
 
             written = true;
         }
-
     }
-
-
 }

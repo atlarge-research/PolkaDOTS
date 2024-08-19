@@ -30,7 +30,7 @@ namespace PolkaDOTS.Deployment
         {
             return Nodes.Keys.Contains(nodeID);
         }
-        
+
         public void SetConnected(int nodeID)
         {
             if (NodeExists(nodeID))
@@ -48,7 +48,7 @@ namespace PolkaDOTS.Deployment
 
             return true;
         }
-        
+
         public void SetEndpoint(int nodeID, NetworkEndpoint endpoint, Entity sourceConnection)
         {
             if (NodeExists(nodeID))
@@ -60,7 +60,7 @@ namespace PolkaDOTS.Deployment
                 Nodes[nodeID] = deploymentNode;
             }
         }
-        
+
         public string GetEndpoint(int nodeID)
         {
             if (NodeExists(nodeID))
@@ -70,25 +70,25 @@ namespace PolkaDOTS.Deployment
 
             return null;
         }
-        
+
         /// <summary>
         /// Returns false if node has pre-configured ip different than specified endpoint, true otherwise
-        /// </summary> 
+        /// </summary>
         public bool CompareEndpoint(int nodeID, NetworkEndpoint endpoint)
         {
             if (NodeExists(nodeID))
             {
                 var deploymentNode = Nodes[nodeID];
                 string addr = endpoint.WithPort(0).ToString();
-                return deploymentNode.endpoint == addr.Substring(0, addr.Length-2);
+                return deploymentNode.endpoint == addr.Substring(0, addr.Length - 2);
             }
 
             return false;
         }
-        
+
         public DeploymentNode? GetNodeByID(int nodeID)
         {
-            if(NodeExists(nodeID))
+            if (NodeExists(nodeID))
                 return Nodes[nodeID];
             return null;
         }
@@ -108,9 +108,9 @@ namespace PolkaDOTS.Deployment
                 for (int i = 0; i < node.worldConfigs.Count; i++)
                 {
                     DeploymentConfigRPC cRPC = new DeploymentConfigRPC();
-                    cRPC.nodeID =  node.id;
+                    cRPC.nodeID = node.id;
                     WorldConfig worldConfig = node.worldConfigs[i];
-                    
+
                     if (worldConfig.initializationMode == InitializationMode.Create)
                         cRPC.action = ConfigRPCActions.Create;
                     else if (worldConfig.initializationMode == InitializationMode.Start)
@@ -119,11 +119,11 @@ namespace PolkaDOTS.Deployment
                         cRPC.action = ConfigRPCActions.Create | ConfigRPCActions.Start | ConfigRPCActions.Connect;
 
                     cRPC.worldName = new FixedString64Bytes(worldConfig.worldName);
-                    
+
                     cRPC.worldType = worldConfig.worldType;
                     cRPC.multiplayStreamingRoles = worldConfig.multiplayStreamingRoles;
                     cRPC.numSimulatedClients = worldConfig.numSimulatedClients;
-                        
+
                     if (worldConfig.serverNodeID == node.id)
                         cRPC.serverIP = "127.0.0.1";
                     else
@@ -132,49 +132,49 @@ namespace PolkaDOTS.Deployment
                         var serverNode = Nodes[worldConfig.serverNodeID];
                         // If that node is the one this system is running on, tell the remote to use our ip
                         FixedString64Bytes endpoint = serverNode.endpoint;
-                        if (worldConfig.serverNodeID == ApplicationConfig.DeploymentID.Value && node.id != ApplicationConfig.DeploymentID.Value )
+                        if (worldConfig.serverNodeID == ApplicationConfig.DeploymentID.Value && node.id != ApplicationConfig.DeploymentID.Value)
                             endpoint = "source";
                         cRPC.serverIP = endpoint;
                     }
                     else
                     {
-                       Debug.Log($"Node {nodeID} World {worldConfig.worldName} has nonexistent server node id: {worldConfig.serverNodeID}!");
+                        Debug.Log($"Node {nodeID} World {worldConfig.worldName} has nonexistent server node id: {worldConfig.serverNodeID}!");
                     }
                     // Give the same server port to all nodes
                     cRPC.serverPort = (ushort)ApplicationConfig.ServerPort;
 
                     // Find and set signaling/streaming URL
-                    if(worldConfig.streamingNodeID == node.id)
-                        cRPC.signallingIP  = "127.0.0.1";
+                    if (worldConfig.streamingNodeID == node.id)
+                        cRPC.signallingIP = "127.0.0.1";
                     else
                     if (NodeExists(worldConfig.streamingNodeID))
                     {
                         var streamingNode = Nodes[worldConfig.streamingNodeID];
-                        
+
                         FixedString64Bytes endpoint = streamingNode.endpoint;
-                        if (worldConfig.serverNodeID == ApplicationConfig.DeploymentID && node.id != ApplicationConfig.DeploymentID )
+                        if (worldConfig.serverNodeID == ApplicationConfig.DeploymentID && node.id != ApplicationConfig.DeploymentID)
                             endpoint = "source";
-                        
+
                         cRPC.signallingIP = endpoint;
                     }
                     else
                     {
-                       Debug.Log($"Node {nodeID} World {worldConfig.worldName} has nonexistent streaming node id: {worldConfig.streamingNodeID}!");
+                        Debug.Log($"Node {nodeID} World {worldConfig.worldName} has nonexistent streaming node id: {worldConfig.streamingNodeID}!");
                     }
-                    
-                    
+
+
                     //cRPC.emulationType = worldConfig.emulationType;
-                    
+
                     configRpcs.Add(cRPC);
                 }
 
             }
             else
             {
-               Debug.Log("NodeToConfig called with nonexistent nodeID!");
+                Debug.Log("NodeToConfig called with nonexistent nodeID!");
             }
-            
-            
+
+
             return configRpcs;
         }
 
@@ -185,43 +185,43 @@ namespace PolkaDOTS.Deployment
         /// </summary>
         private void ParseDeploymentConfig()
         {
-            if(ApplicationConfig.ImportDeploymentConfig.Value is null)
+            if (ApplicationConfig.ImportDeploymentConfig.Value is null)
                 return;
 
             JsonDeploymentConfig JPC = (JsonDeploymentConfig)ApplicationConfig.ImportDeploymentConfig.Value;
-            
+
             JsonDeploymentNode[] jsonNodes = JPC.nodes;
             for (int i = 0; i < jsonNodes.Length; i++)
             {
                 JsonDeploymentNode jsonNode = jsonNodes[i];
                 DeploymentNode newNode = new DeploymentNode();
-                
+
                 newNode.id = jsonNode.nodeID;
                 newNode.connected = false;
                 // Node ip can either be unknown or known in advance
                 if (jsonNode.nodeIP.IsNullOrEmpty())
                 {
                     // IP not known yet, update when we receive communication from this node
-                    newNode.endpoint = "127.0.0.1"; 
+                    newNode.endpoint = "127.0.0.1";
                 }
                 else
                 {
-                    if(NetworkEndpoint.TryParse(jsonNode.nodeIP, (ushort)ApplicationConfig.DeploymentPort, out NetworkEndpoint endpoint,
+                    if (NetworkEndpoint.TryParse(jsonNode.nodeIP, (ushort)ApplicationConfig.DeploymentPort, out NetworkEndpoint endpoint,
                            NetworkFamily.Ipv4))
                     {
                         newNode.endpoint = jsonNode.nodeIP;
                     }
                     else
                     {
-                       Debug.Log($"Node deployment IP: {jsonNode.nodeIP} cannot be parsed!");
-                        newNode.endpoint = "127.0.0.1"; 
+                        Debug.Log($"Node deployment IP: {jsonNode.nodeIP} cannot be parsed!");
+                        newNode.endpoint = "127.0.0.1";
                     }
                 }
-                
+
                 // Handle worlds list
                 newNode.worldConfigs = new List<WorldConfig>(jsonNode.worldConfigs);
-                
-                
+
+
                 /* Services
                 // TODO Node connections based on service dependencies!
                 foreach (var serviceName in jsonNode.services)
@@ -241,7 +241,7 @@ namespace PolkaDOTS.Deployment
                 }*/
 
                 Nodes.Add(newNode.id, newNode);
-                
+
             }
             // Check experiment action validity
             ExperimentAction[] actionsArray = JPC.experimentActions;
@@ -264,20 +264,20 @@ namespace PolkaDOTS.Deployment
                         Debug.LogWarning($"NodeAction specified for node {nodeAction.nodeID} which does not exist!");
                         continue;
                     }
-                    
+
                     if (nodeAction.worldNames.Length != nodeAction.actions.Length)
                     {
                         Debug.LogWarning($"NodeAction World and WorldActions are not the same length!");
                         continue;
                     }
-                    
+
                     var worldConfigs = deploymentNode.Value.worldConfigs;
                     List<int> worldIDs = new List<int>();
                     bool worldNotFound = false;
                     foreach (string worldName in nodeAction.worldNames)
                     {
                         bool foundWorld = false;
-                        for(int worldID = 0; worldID < worldConfigs.Count; worldID++)
+                        for (int worldID = 0; worldID < worldConfigs.Count; worldID++)
                         {
                             var worldConfig = worldConfigs[worldID];
                             if (worldConfig.worldName == worldName)
@@ -294,7 +294,7 @@ namespace PolkaDOTS.Deployment
                             worldNotFound = true;
                         }
                     }
-                    if(worldNotFound)
+                    if (worldNotFound)
                         continue;
 
                     // If all checks are valid, add this action to the list
@@ -305,10 +305,10 @@ namespace PolkaDOTS.Deployment
                             worldConfigID = worldIDs.ToArray(),
                             worldActions = nodeAction.actions
                         });
-                    
+
                 }
-                
-                
+
+
                 ExperimentActionList.Add(nodeExperimentAction);
             }
 
@@ -329,24 +329,24 @@ namespace PolkaDOTS.Deployment
             return null;
         }*/
     }
-    
-    
+
+
     public struct DeploymentNode : IEquatable<DeploymentNode>
     {
         // ID of the node, used for equality
         public int id;
         // Set when this node has communicated with deployment service
         public bool connected;
-        
+
         // Source connection Entity of this node
         public Entity sourceConnection;
-        
+
         // Network location of this node
         public string endpoint;
-        
+
         // World details
         public List<WorldConfig> worldConfigs;
-        
+
         public bool Equals(DeploymentNode other)
         {
             return id == other.id;
@@ -361,7 +361,7 @@ namespace PolkaDOTS.Deployment
         {
             return id;
         }
-        
+
         public override string ToString() =>
             $"[nodeID: {id}; endpoint: {endpoint}; worldConfig: {worldConfigs};]";
     }
@@ -373,14 +373,34 @@ namespace PolkaDOTS.Deployment
         public List<DeploymentNodeAction> deploymentNodeActions;
 
     }
-    
+
+    /// <summary>
+    /// <para>
+    /// Encodes a change in game deployment that is to be performed while the game is running.
+    /// These actions are used in the PolkaDOTS MSc thesis.
+    /// </para>
+    ///
+    /// <para>
+    /// WIP: The plan is to also use this struct for changes incurred by the external scheduler.
+    /// </para>
+    /// </summary>
     public struct DeploymentNodeAction
     {
+        /// <summary>
+        /// The node whose deployment should change
+        /// </summary>
         public int nodeID;
+
+        /// <summary>
+        /// The IDs of the node config to use, corresponding to the nodeID property in this struct.
+        /// One per action
+        /// </summary>
         public int[] worldConfigID;
+
+        /// <summary>
+        /// The action to take for this node, corresponding to the nodeID property in this struct.
+        /// One per action
+        /// </summary>
         public WorldAction[] worldActions;
-
     }
-    
-
 }

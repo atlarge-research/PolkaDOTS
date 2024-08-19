@@ -17,19 +17,19 @@ namespace PolkaDOTS
     public struct ExitWorld : IComponentData
     {
     }
-    
+
     /// <summary>
     /// Run in all worlds to exit upon receiving a quit flag
     /// </summary>
-    [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation | WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ThinClientSimulation)] 
+    [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation | WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ThinClientSimulation)]
     public partial class StopWorldSystem : SystemBase
     {
         private EntityQuery exitQuery;
         protected override void OnCreate()
         {
-           exitQuery = new EntityQueryBuilder(Allocator.Temp)
-               .WithAllRW<ExitWorld>()
-               .Build(this);
+            exitQuery = new EntityQueryBuilder(Allocator.Temp)
+                .WithAllRW<ExitWorld>()
+                .Build(this);
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace PolkaDOTS
                 if (World.IsStreamedClient() || World.IsHostClient())
                 {
                     // Cleanup Multiplay
-                    Multiplay.Multiplay multiplay = MultiplaySingleton.Instance;
+                    var multiplay = MultiplaySingleton.Instance;
                     if (multiplay is not null)
                     {
                         multiplay.StopMultiplay();
