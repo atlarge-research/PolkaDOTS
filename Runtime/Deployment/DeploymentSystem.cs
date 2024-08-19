@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using PolkaDOTS.Bootstrap;
 using PolkaDOTS.Multiplay;
 using Unity.Burst;
@@ -13,7 +12,6 @@ using UnityEngine;
 
 namespace PolkaDOTS.Deployment
 {
-
     /// <summary>
     /// This struct is sent as RPC payload to request the configuration for the given node.
     /// </summary>
