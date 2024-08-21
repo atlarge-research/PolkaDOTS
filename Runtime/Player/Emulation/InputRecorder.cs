@@ -4,6 +4,7 @@ using UnityEngine.Events;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Layouts;
 using UnityEngine.InputSystem.LowLevel;
+using System.IO;
 
 // from InputSystem package Input Recorder Sample
 namespace PolkaDOTS.Emulation
@@ -281,9 +282,20 @@ namespace PolkaDOTS.Emulation
         {
             if (string.IsNullOrEmpty(fileName))
                 throw new ArgumentNullException(nameof(fileName));
+            
 
             CreateEventTrace();
-            m_EventTrace.ReadFrom(fileName);
+
+            if (!File.Exists(fileName))
+            {
+                TextAsset ta = Resources.Load<TextAsset>(fileName);
+                Stream inputTraceStream = new MemoryStream(ta.bytes);
+                m_EventTrace.ReadFrom(inputTraceStream);
+            }
+            else
+            {
+                m_EventTrace.ReadFrom(fileName);
+            }
         }
 
         public void SaveCaptureToFile(string fileName)
