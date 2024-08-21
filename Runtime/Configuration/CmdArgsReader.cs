@@ -51,13 +51,14 @@ namespace PolkaDOTS.Configuration
             else
             {
                 // Otherwise, use arguments in editor MonoBehaviour 
-                //args = editorArgs.editorArgs.Split(' ');
-                args = getArgsFromJson();
+                args = editorArgs.editorArgs.Split(' ');
+                //args = getArgsFromJson(); //uncomment this line if you want editor to prefer resources over the monobehaviour
             }
 #else
             // Read from normal command line application arguments
             args = Environment.GetCommandLineArgs();
             if(args.Length == 1){
+                Debug.LogWarning("no cli-args supplied, attempting to load args from resources!");
                 args = getArgsFromJson();
             }
 #endif
@@ -68,10 +69,18 @@ namespace PolkaDOTS.Configuration
         private static string[] getArgsFromJson()
         {
             TextAsset jsonTxt = Resources.Load<TextAsset>(argjsonFileName);
-            Debug.Log($"[CONFIG:] Found arg json: {jsonTxt}");
-            CmdArgsJson argsObj = JsonConvert.DeserializeObject<CmdArgsJson>(jsonTxt.text);
-            Debug.Log($"[CONFIG:] Found args: {argsObj.args}");
-            return argsObj.args;
+            if(jsonTxt != null) {
+                Debug.Log($"[CONFIG:] Found arg json: {jsonTxt}");
+                CmdArgsJson argsObj = JsonConvert.DeserializeObject<CmdArgsJson>(jsonTxt.text);
+                Debug.Log($"[CONFIG:] Found args: {argsObj.args}");
+                return argsObj.args;
+            }
+            else
+            {
+                Debug.LogError("");
+                return new string[0];
+            }
+            
         }
 
         public static bool ParseCmdArgs()
