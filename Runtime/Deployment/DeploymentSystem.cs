@@ -161,8 +161,8 @@ namespace PolkaDOTS.Deployment
                                                                            //commandBuffer.AddComponent<NetworkStreamInGame>(sourceConn);
 
                 var res = commandBuffer.CreateEntity();
-                int nodeID = req.ValueRO.nodeID;
-                DeploymentNode? node = _deploymentGraph.GetNodeByID(nodeID);
+                var nodeID = req.ValueRO.nodeID;
+                var node = _deploymentGraph.GetNodeByID(nodeID);
                 Debug.Log($"Got configuration request for node with ID {nodeID}");
                 // Check request validity
                 if (node == null)
@@ -183,7 +183,7 @@ namespace PolkaDOTS.Deployment
                     _deploymentGraph.SetConnected(nodeID);
                     // Get the source network endpoint of the node
                     var connection = connectionLookup[sourceConn];
-                    NetworkEndpoint remoteEndpoint = netDriver.GetRemoteEndPoint(connection);
+                    var remoteEndpoint = netDriver.GetRemoteEndPoint(connection);
                     if (!_deploymentGraph.CompareEndpoint(nodeID, remoteEndpoint))
                     {
                         Debug.Log($"Received config request for node {nodeID} from endpoint {remoteEndpoint}," +
@@ -192,7 +192,7 @@ namespace PolkaDOTS.Deployment
                     }
                     _deploymentGraph.SetEndpoint(nodeID, remoteEndpoint, sourceConn);
                     // Build response with configuration details
-                    List<DeploymentConfigRPC> cRPCs = _deploymentGraph.NodeToConfigRPCs(nodeID);
+                    var cRPCs = _deploymentGraph.NodeToConfigRPCs(nodeID);
                     // Create a set of configuration RPCs
                     foreach (var cRPC in cRPCs)
                     {
@@ -213,7 +213,7 @@ namespace PolkaDOTS.Deployment
             }
 
             // Handle received configuration error RPC
-            foreach (var (reqSrc, errorRPC, reqEntity) in SystemAPI
+            foreach (var (_, errorRPC, reqEntity) in SystemAPI
                          .Query<RefRO<ReceiveRpcCommandRequest>, RefRO<ConfigErrorRPC>>()
                          .WithEntityAccess())
             {
@@ -222,7 +222,7 @@ namespace PolkaDOTS.Deployment
             }
 
             // Handle timing events
-            double elapsed = World.Time.ElapsedTime - _startTime;
+            var elapsed = World.Time.ElapsedTime - _startTime;
             if (ApplicationConfig.Duration > 0 && elapsed > ApplicationConfig.Duration)
             {
                 Debug.Log($"[{DateTime.Now.TimeOfDay}]: Experiment duration of {ApplicationConfig.Duration.Value} seconds elapsed! Exiting.");
@@ -230,11 +230,13 @@ namespace PolkaDOTS.Deployment
             }
 
             // Handle experiment control events
-            for (int experimentID = 0; experimentID < _deploymentGraph.ExperimentActionList.Count; experimentID++)
+            for (var experimentID = 0; experimentID < _deploymentGraph.ExperimentActionList.Count; experimentID++)
             {
                 // Wait for all nodes to connect to begin experiment
                 if (!_allNodesConnected)
+                {
                     break;
+                }
 
                 var experimentAction = _deploymentGraph.ExperimentActionList[experimentID];
                 if (elapsed > experimentAction.delay && !experimentAction.done)
@@ -244,24 +246,24 @@ namespace PolkaDOTS.Deployment
                     foreach (var nodeAction in nodeActions)
                     {
                         // Do the action
-                        DeploymentNode node = _deploymentGraph.GetNodeByID(nodeAction.nodeID).Value;
+                        var node = _deploymentGraph.GetNodeByID(nodeAction.nodeID).Value;
                         if (!node.connected)
                         {
                             Debug.LogWarning($"NodeAction failed, node {node.id} has not connected!");
                             continue;
                         }
                         // Iterate over the actions, perform them one by one
-                        for (int i = 0; i < nodeAction.worldActions.Length; i++)
+                        for (var i = 0; i < nodeAction.worldActions.Length; i++)
                         {
                             // Look up the given node's world config as listed in the deployment graph file
-                            WorldConfig worldConfig = node.worldConfigs[nodeAction.worldConfigID[i]];
+                            var worldConfig = node.worldConfigs[nodeAction.worldConfigID[i]];
                             // Get the name for that world config
-                            string worldName = worldConfig.worldName;
+                            var worldName = worldConfig.worldName;
                             // Get the corresponding world action
-                            WorldAction action = nodeAction.worldActions[i];
+                            var action = nodeAction.worldActions[i];
 
                             // Address to point to deployment component. Assume it's on localhost for now...
-                            FixedString64Bytes connectionURL = new FixedString64Bytes("127.0.0.1");
+                            var connectionURL = new FixedString64Bytes("127.0.0.1");
                             // Assume the port is 7979 for now...
                             ushort connectionPort = 7979;
 
@@ -272,8 +274,7 @@ namespace PolkaDOTS.Deployment
                                 if (worldConfig.worldType == WorldTypes.Client && worldConfig.multiplayStreamingRoles ==
                                     MultiplayStreamingRoles.Guest)
                                 {
-                                    DeploymentNode? targetNode =
-                                        _deploymentGraph.GetNodeByID(worldConfig.streamingNodeID);
+                                    var targetNode = _deploymentGraph.GetNodeByID(worldConfig.streamingNodeID);
                                     if (!targetNode.HasValue)
                                     {
                                         Debug.LogWarning($"Target node for streaming {worldConfig.streamingNodeID} does not exist!");
@@ -291,8 +292,9 @@ namespace PolkaDOTS.Deployment
                                 else if (worldConfig.worldType == WorldTypes.Client && worldConfig.multiplayStreamingRoles !=
                                            MultiplayStreamingRoles.Guest)
                                 {
-                                    // TODO This code does almost the same as the if-part of this clause, except it does not change the port number..
-                                    DeploymentNode? targetNode =
+                                    // TODO This code does almost the same as the if-part of this clause,
+                                    // except it does not change the port number..
+                                    var targetNode =
                                         _deploymentGraph.GetNodeByID(worldConfig.serverNodeID);
                                     if (!targetNode.HasValue)
                                     {
@@ -340,14 +342,11 @@ namespace PolkaDOTS.Deployment
                                     new SendRpcCommandRequest { TargetConnection = node.sourceConnection });
                             }
                         }
-
                     }
-
                     experimentAction.done = true;
                     _deploymentGraph.ExperimentActionList[experimentID] = experimentAction;
                 }
             }
-
             commandBuffer.Playback(EntityManager);
         }
 
