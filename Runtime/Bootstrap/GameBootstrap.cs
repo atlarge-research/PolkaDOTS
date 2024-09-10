@@ -137,6 +137,9 @@ namespace PolkaDOTS.Bootstrap
             var deploymentClassType = ApplicationConfig.GetRemoteConfig ? typeof(DeploymentReceiveSystem) : typeof(DeploymentServiceSystem);
             filteredSystems.Add(TypeManager.GetSystemTypeIndex(deploymentClassType));
 
+            // Add a remote control deployment system
+            filteredSystems.Add(TypeManager.GetSystemTypeIndex(typeof(RemoteControlledDeploymentSystem)));
+
             // Add Unity Scene System for managing GUIDs
             filteredSystems.Add(TypeManager.GetSystemTypeIndex(typeof(SceneSystem)));
             // Add NetCode monitor

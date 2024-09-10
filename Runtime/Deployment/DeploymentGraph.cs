@@ -105,18 +105,27 @@ namespace PolkaDOTS.Deployment
             {
                 var node = Nodes[nodeID];
 
-                for (int i = 0; i < node.worldConfigs.Count; i++)
+                for (var i = 0; i < node.worldConfigs.Count; i++)
                 {
-                    DeploymentConfigRPC cRPC = new DeploymentConfigRPC();
-                    cRPC.nodeID = node.id;
-                    WorldConfig worldConfig = node.worldConfigs[i];
+                    var cRPC = new DeploymentConfigRPC
+                    {
+                        nodeID = node.id
+                    };
+                    var worldConfig = node.worldConfigs[i];
 
+                    // world lifecycle: Create -> Start -> Connect (-> Stop)
                     if (worldConfig.initializationMode == InitializationMode.Create)
+                    {
                         cRPC.action = ConfigRPCActions.Create;
+                    }
                     else if (worldConfig.initializationMode == InitializationMode.Start)
+                    {
                         cRPC.action = ConfigRPCActions.Create | ConfigRPCActions.Start;
+                    }
                     else if (worldConfig.initializationMode == InitializationMode.Connect)
+                    {
                         cRPC.action = ConfigRPCActions.Create | ConfigRPCActions.Start | ConfigRPCActions.Connect;
+                    }
 
                     cRPC.worldName = new FixedString64Bytes(worldConfig.worldName);
 
@@ -125,15 +134,19 @@ namespace PolkaDOTS.Deployment
                     cRPC.numSimulatedClients = worldConfig.numSimulatedClients;
 
                     if (worldConfig.serverNodeID == node.id)
+                    {
                         cRPC.serverIP = "127.0.0.1";
-                    else
-                    if (NodeExists(worldConfig.serverNodeID))
+                    }
+                    else if (NodeExists(worldConfig.serverNodeID))
                     {
                         var serverNode = Nodes[worldConfig.serverNodeID];
                         // If that node is the one this system is running on, tell the remote to use our ip
                         FixedString64Bytes endpoint = serverNode.endpoint;
                         if (worldConfig.serverNodeID == ApplicationConfig.DeploymentID.Value && node.id != ApplicationConfig.DeploymentID.Value)
+                        {
                             endpoint = "source";
+                        }
+
                         cRPC.serverIP = endpoint;
                     }
                     else
@@ -145,9 +158,10 @@ namespace PolkaDOTS.Deployment
 
                     // Find and set signaling/streaming URL
                     if (worldConfig.streamingNodeID == node.id)
+                    {
                         cRPC.signallingIP = "127.0.0.1";
-                    else
-                    if (NodeExists(worldConfig.streamingNodeID))
+                    }
+                    else if (NodeExists(worldConfig.streamingNodeID))
                     {
                         var streamingNode = Nodes[worldConfig.streamingNodeID];
 

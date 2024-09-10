@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
+using System.Threading.Tasks;
 using PolkaDOTS.Bootstrap;
 using PolkaDOTS.Multiplay;
 using Unity.Burst;
@@ -230,6 +232,25 @@ namespace PolkaDOTS.Deployment
             }
 
             // Handle experiment control events
+            //
+            // Example of experiment event JSON:
+            // "experimentActions":[
+            // 	{
+            // 		"delay": 120,
+            // 		"actions": [
+            // 			{
+            // 				"nodeID": 1,
+            // 				"worldNames": ["GameClient", "StreamedClient"],
+            // 				"actions": ["Stop", "Connect"]
+            // 			},
+            // 			{
+            // 				"nodeID": 2,
+            // 				"worldNames": ["CloudHostClient"],
+            // 				"actions": ["Connect"]
+            // 			}
+            // 		]
+            // 	}
+            // ]
             for (var experimentID = 0; experimentID < _deploymentGraph.ExperimentActionList.Count; experimentID++)
             {
                 // Wait for all nodes to connect to begin experiment
@@ -561,7 +582,7 @@ namespace PolkaDOTS.Deployment
             if (connURL == "source")
             {
                 var addr = sourceConn.WithPort(0).ToString();
-                connURL = addr[..^2]; // strip the ":0" from the address
+                connURL = addr[..^2]; // strip the ":0" suffix from the address string
                 Debug.Log($"'source' url converted to {connURL}");
             }
 
@@ -625,6 +646,66 @@ namespace PolkaDOTS.Deployment
             }
 
             return true;
+        }
+    }
+
+    /// <summary>
+    /// Sends <see cref="RequestConfigRPC"/> and uses the configuration in the response <see cref="DeploymentConfigRPC"/>
+    /// to create local worlds
+    /// </summary>
+    [WorldSystemFilter(WorldSystemFilterFlags.Disabled)] // Don't automatically add to worlds
+    public partial class RemoteControlledDeploymentSystem : SystemBase
+    {
+        private HttpListener _httpListener;
+        private Task<HttpListenerContext> _request;
+        protected override void OnCreate()
+        {
+            _httpListener = new HttpListener();
+            // TODO pass uri prefix as config option
+            _httpListener.Prefixes.Add("http://*:7982/");
+            _httpListener.Start();
+        }
+
+        protected override void OnUpdate()
+        {
+            if (_request is not null && _request.IsCompleted)
+            {
+                // Is it smart to do parse HTTP requests and send a reply on the same thread
+                // as we're rendering a frame?
+                // Unlikely!
+                // However, we (1) expect these events to be vary rare compared to the frame rate and
+                // (2) handling this event will any way trigger a delay because we will be switching
+                // between local and remote rendering.
+                if (_request.IsCompletedSuccessfully)
+                {
+                    Debug.Log("Got some request!");
+                    var result = _request.Result;
+                    var request = result.Request;
+                    var response = result.Response;
+
+                    using (var body = request.InputStream)
+                    using (var reader = new System.IO.StreamReader(body, request.ContentEncoding))
+                    {
+                        var requestBody = reader.ReadToEnd();
+                        Debug.Log("Request Body: " + requestBody);
+                    }
+
+                    // Respond to request
+                    response.StatusCode = 204;
+                    response.ContentLength64 = 0;
+                    response.Close();
+                }
+                else
+                {
+                    Debug.Log("Got a buggy request!");
+                }
+            }
+
+            // Listen for a new request
+            if (_request is null || _request.IsCompleted)
+            {
+                _request = _httpListener.GetContextAsync();
+            }
         }
     }
 }
