@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading;
@@ -47,6 +46,8 @@ namespace PolkaDOTS.Bootstrap
                 Application.Quit();
                 return false;
             }
+
+            Debug.Log(ApplicationConfig.ToString());
 
             // If there is a start delay, wait to perform bootstrap initialization
             if (ApplicationConfig.Delay.Value > 0)

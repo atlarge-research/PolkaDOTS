@@ -31,12 +31,12 @@ namespace PolkaDOTS.Configuration
             editorArgs = (EditorCmdArgs)GameObject.FindFirstObjectByType(typeof(EditorCmdArgs));
             if (ClonesManager.IsClone())
             {
-                // Get the custom arguments for this clone project.  
+                // Get the custom arguments for this clone project.
                 args = ClonesManager.GetArgument().Split(' ');
             }
             else
             {
-                // Otherwise, use arguments in editor MonoBehaviour 
+                // Otherwise, use arguments in editor MonoBehaviour
                 args = editorArgs.editorArgs.Split(' ');
             }
 #else
@@ -45,7 +45,7 @@ namespace PolkaDOTS.Configuration
 #endif
             return args;
         }
-        
+
         public static bool ParseCmdArgs()
         {
             var arguments = GetCommandlineArgs();
@@ -60,7 +60,7 @@ namespace PolkaDOTS.Configuration
 #if UNITY_EDITOR
 
             Debug.Log("Overriding config with editor vars.");
-            // Override PlayType, NumThinClients, ServerAddress, and ServerPort from editor settings 
+            // Override PlayType, NumThinClients, ServerAddress, and ServerPort from editor settings
             string s_PrefsKeyPrefix = $"MultiplayerPlayMode_{Application.productName}_";
             string s_PlayModeTypeKey = s_PrefsKeyPrefix + "PlayMode_Type";
             string s_RequestedNumThinClientsKey = s_PrefsKeyPrefix + "NumThinClients";
@@ -71,7 +71,7 @@ namespace PolkaDOTS.Configuration
                 (ClientServerBootstrap.PlayType)EditorPrefs.GetInt(s_PlayModeTypeKey,
                     (int)ClientServerBootstrap.PlayType.ClientAndServer);
             if (ApplicationConfig.PlayType != GameBootstrap.BootstrapPlayTypes.StreamedClient &&
-                ApplicationConfig.PlayType != GameBootstrap.BootstrapPlayTypes.SimulatedClient )
+                ApplicationConfig.PlayType != GameBootstrap.BootstrapPlayTypes.SimulatedClient)
                 ApplicationConfig.PlayType.SetValue((GameBootstrap.BootstrapPlayTypes)editorPlayType);
             // Server address
             string editorServerAddress = EditorPrefs.GetString(s_AutoConnectionAddressKey, "127.0.0.1");
@@ -79,7 +79,7 @@ namespace PolkaDOTS.Configuration
             //Server port
             int editorServerPort = EditorPrefs.GetInt(s_AutoConnectionPortKey, 7979);
             if (editorServerPort != 0)
-                ApplicationConfig.ServerPort.SetValue(editorServerPort); 
+                ApplicationConfig.ServerPort.SetValue(editorServerPort);
 
             // Override Deployment ApplicationConfig using this MonoBehaviour's attributes
             if (editorArgs.useDeploymentConfig && !ClonesManager.IsClone())
@@ -91,7 +91,7 @@ namespace PolkaDOTS.Configuration
                 else
                 {
                     //Use Newtonsoft JSON parsing to support enum serialization to/from string
-                    ApplicationConfig.ImportDeploymentConfig.SetValue(JsonConvert.DeserializeObject<JsonDeploymentConfig>(editorArgs.deploymentConfig)); 
+                    ApplicationConfig.ImportDeploymentConfig.SetValue(JsonConvert.DeserializeObject<JsonDeploymentConfig>(editorArgs.deploymentConfig));
                 }
             }
 
@@ -110,7 +110,7 @@ namespace PolkaDOTS.Configuration
                 Debug.Log("Cannot run Multiplay streaming on Server, disabling Multiplay!");
                 ApplicationConfig.MultiplayStreamingRole.SetValue(MultiplayStreamingRoles.Disabled);
             }
-            
+
             return true;
         }
 

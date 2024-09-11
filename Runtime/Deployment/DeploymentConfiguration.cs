@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 namespace PolkaDOTS.Deployment
 {
@@ -10,6 +11,13 @@ namespace PolkaDOTS.Deployment
     {
         public JsonDeploymentNode[] nodes;
         public ExperimentAction[] experimentActions;
+
+        public override readonly string ToString()
+        {
+            var ns = string.Join(",", nodes.Select(x => x.ToString()).ToArray());
+            var actions = string.Join(",", experimentActions.Select(x => x.ToString()).ToArray());
+            return $"{{'nodes': [{ns}], 'experimentActions': [{actions}]}}";
+        }
     }
 
     /// <summary>
@@ -21,6 +29,12 @@ namespace PolkaDOTS.Deployment
         public int nodeID;
         public string nodeIP;
         public WorldConfig[] worldConfigs;
+
+        public override readonly string ToString()
+        {
+            var configs = string.Join(",", worldConfigs.Select(x => x.ToString()).ToArray());
+            return $"{{'nodeID': {nodeID}, 'nodeIP': {nodeIP}, 'worldConfigs': {configs}}}";
+        }
     }
 
     /// <summary>
@@ -31,6 +45,12 @@ namespace PolkaDOTS.Deployment
     {
         public int delay;
         public NodeAction[] actions;
+
+        public override string ToString()
+        {
+            var a = string.Join(",", actions.Select(x => x.ToString()).ToArray());
+            return $"{{'delay': {delay}, 'actions': {actions}}}";
+        }
     }
 
     /// <summary>
@@ -42,6 +62,13 @@ namespace PolkaDOTS.Deployment
         public int nodeID;
         public string[] worldNames;
         public WorldAction[] actions;
+
+        public override string ToString()
+        {
+            var names = string.Join(",", worldNames.Select(x => x.ToString()).ToArray());
+            var a = string.Join(",", actions.Select(x => x.ToString()).ToArray());
+            return $"{{'nodeID': {nodeID}, 'worldNames': {names}, 'actions': {a}}}";
+        }
     }
 
     /// <summary>

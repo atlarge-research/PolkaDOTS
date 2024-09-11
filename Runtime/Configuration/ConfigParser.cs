@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using Newtonsoft.Json;
-using Unity.Logging.Internal.Debug;
 using UnityEngine;
 
 namespace PolkaDOTS.Configuration
@@ -15,7 +14,7 @@ namespace PolkaDOTS.Configuration
     public static class CommandLineParser
     {
         internal delegate bool TryParseDelegate<T>(string[] arguments, string argumentName, out T result);
-        
+
         public abstract class BaseArgument<T> : IArgument
         {
             /// <summary>
@@ -24,30 +23,30 @@ namespace PolkaDOTS.Configuration
             public string ArgumentName { get; }
 
             /// <summary>
-            /// 
+            ///
             /// </summary>
             public bool Defined => m_defined;
 
             /// <summary>
-            /// 
+            ///
             /// </summary>
             public readonly bool Required;
 
             /// <summary>
-            /// 
+            ///
             /// </summary>
             public T Value => m_value;
 
             /// <summary>
-            /// 
+            ///
             /// </summary>
             public void SetValue(T val)
             {
                 m_value = val;
             }
-            
+
             /// <summary>
-            /// 
+            ///
             /// </summary>
             protected T Default;
 
@@ -81,7 +80,11 @@ namespace PolkaDOTS.Configuration
                 Default = defaultValue;
                 m_parser = DefaultParser;
             }
-            
+
+            public override string ToString()
+            {
+                return m_value.ToString();
+            }
         }
 
         public class StringArgument : BaseArgument<string>
@@ -121,7 +124,7 @@ namespace PolkaDOTS.Configuration
 
             public static implicit operator int(IntArgument argument) => argument.Value;
         }
-        
+
         public class FlagArgument : BaseArgument<bool>
         {
             protected override bool DefaultParser(string[] arguments, string argumentName, out bool parsedResult) => TryParseFlagArgument(arguments, argumentName, out parsedResult, Required);
@@ -139,7 +142,7 @@ namespace PolkaDOTS.Configuration
 
             public static implicit operator T?(JsonFileArgument<T> argument) => argument.Value;
         }
-        
+
         /*public class JsonFileArgumentClass<T> : BaseArgument<T> where T : class
         {
             protected override bool DefaultParser(string[] arguments, string argumentName, out T parsedResult) => TryParseJsonFileArgumentClass(arguments, argumentName, out parsedResult, Required);
@@ -148,11 +151,11 @@ namespace PolkaDOTS.Configuration
 
             public static implicit operator T(JsonFileArgumentClass<T> argument) => argument.Value;
         }*/
-        
+
         public class FilePathArgument : BaseArgument<string>
         {
             protected override bool DefaultParser(string[] arguments, string argumentName, out string parsedResult) => TryParseFilePathArgument(arguments, argumentName, out parsedResult, Default);
-            
+
             public FilePathArgument(string argumentName, string defaultVal, bool required = false) : base(argumentName, defaultVal, required) { }
 
             public static implicit operator string(FilePathArgument argument) => argument.Value;
@@ -218,7 +221,7 @@ namespace PolkaDOTS.Configuration
             argumentValue = result;
             return true;
         }
-        
+
         static bool TryParseFlagArgument(string[] arguments, string argumentName, out bool argumentValue, bool required = false)
         {
             var startIndex = System.Array.FindIndex(arguments, x => x == argumentName);
@@ -275,7 +278,7 @@ namespace PolkaDOTS.Configuration
             argumentValue = null;
             return result;
         }
-        
+
         /*static bool TryParseJsonFileArgumentClass<T>(string[] arguments, string argumentName, out T argumentValue,
             bool required = false) where T : class
         {
@@ -322,14 +325,14 @@ namespace PolkaDOTS.Configuration
             argumentValue = value;
             return true;
         }
-        
+
         /// <summary>
         /// Finds all classes with a particular attribute type
         /// </summary>
         /// <param name="inherit">Whether to includes class that indirectly inherent the attribute</param>
         /// <returns>List of Types with the given attribute.</returns>
         /// <remarks>See https://stackoverflow.com/questions/720157/finding-all-classes-with-a-particular-attribute</remarks>
-        public static IEnumerable<Type> GetTypesWith<TAttribute>(bool inherit=false) where TAttribute : Attribute
+        public static IEnumerable<Type> GetTypesWith<TAttribute>(bool inherit = false) where TAttribute : Attribute
         {
             var output = new List<Type>();
 
@@ -350,13 +353,13 @@ namespace PolkaDOTS.Configuration
         }
 
         /// <summary>
-        /// Calls TryParse on all Argument objects in all classes marked with ArgumentClass 
+        /// Calls TryParse on all Argument objects in all classes marked with ArgumentClass
         /// </summary>
         /// <param name="commandLineArgs">List of string arguments from command line</param>
         /// <returns>True if all arguments parsed successfully</returns>
         /// <remarks>See https://stackoverflow.com/questions/5976216/how-to-call-an-explicitly-implemented-interface-method-on-the-base-class</remarks>
         internal static bool TryParse(string[] commandLineArgs)
-        { 
+        {
             var argumentClasses = GetTypesWith<ArgumentClass>();
             foreach (var argumentClassType in argumentClasses)
             {
@@ -373,7 +376,7 @@ namespace PolkaDOTS.Configuration
                         {
                             if (method.Name.Contains("TryParse"))
                             {
-                                bool ret = (bool)method.Invoke(argumentField, new object[]{commandLineArgs});
+                                bool ret = (bool)method.Invoke(argumentField, new object[] { commandLineArgs });
                                 if (!ret)
                                 {
                                     Debug.Log($"Failed to read argument {field.Name}");
