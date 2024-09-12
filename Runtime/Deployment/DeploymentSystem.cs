@@ -685,14 +685,14 @@ namespace PolkaDOTS.Deployment
         public class RemoteDeploymentRequest
         {
             public string role;
-            public string host;
+            public string ipv4;
             public ushort port;
             public ushort numberOfClients = 1;
             public string signalingUrl = "ws://127.0.0.1:7981";
 
             public override string ToString()
             {
-                return $"role={role},addr={host}:{port},numberOfClients={numberOfClients},signalingUrl={signalingUrl}";
+                return $"role={role},addr={ipv4}:{port},numberOfClients={numberOfClients},signalingUrl={signalingUrl}";
             }
         }
 
@@ -777,7 +777,9 @@ namespace PolkaDOTS.Deployment
             Debug.Log(request);
 
             var role = request.role;
-            var serverHost = request.host;
+            // Translate Hostname to IP address immediately because most of the code cannot handle hostnames
+            // TODO error handling
+            var serverIP = request.ipv4;
             var serverPort = request.port;
             var numSimulatedClients = request.numberOfClients;
             var signalingUrl = request.signalingUrl;
@@ -794,7 +796,7 @@ namespace PolkaDOTS.Deployment
             {
                 var bootstrap = BootstrapInstance.instance;
                 bootstrap.SetupWorlds(MultiplayStreamingRoles.Disabled, GameBootstrap.BootstrapPlayTypes.Client,
-                    ref worlds, numSimulatedClients, true, true, serverHost, serverPort, signalingUrl, worldName);
+                    ref worlds, numSimulatedClients, true, true, serverIP, serverPort, signalingUrl, worldName);
 
                 // TODO loop below should NOT be used when using thin client
                 foreach (var w in worlds)
@@ -805,15 +807,15 @@ namespace PolkaDOTS.Deployment
                 commandBuffer.Playback(EntityManager);
 
                 var world = BootstrapInstance.instance.worlds.Find(w => w.Name == worldName);
-                var serverIPs = Dns.GetHostAddresses(serverHost);
-                Assert.IsTrue(serverIPs.Length > 0);
-                DeploymentConfigHelpers.HandleWorldAction(world, serverIPs[0].ToString(), serverPort,
+                Debug.Log(world.Name);
+                // FIXME Calling HandleWorldAction leads to bug pasted in notes file 2024-09-12
+                DeploymentConfigHelpers.HandleWorldAction(world, serverIP, serverPort,
                     WorldAction.Connect);
 
-                // stop the thin client!
-                // TODO don't GUESS the world name!
-                var thinClientWorld = BootstrapInstance.instance.worlds.Find(w => w.Name == "StreamingGuestWorld");
-                DeploymentConfigHelpers.HandleWorldAction(thinClientWorld, null, 0, WorldAction.Stop);
+                // // stop the thin client!
+                // // TODO don't GUESS the world name!
+                // var thinClientWorld = BootstrapInstance.instance.worlds.Find(w => w.Name == "StreamingGuestWorld");
+                // DeploymentConfigHelpers.HandleWorldAction(thinClientWorld, null, 0, WorldAction.Stop);
             }
             else
             {
