@@ -51,6 +51,10 @@ namespace PolkaDOTS
         //internal static readonly CommandLineParser.StringArgument IceServerUsername = new CommandLineParser.StringArgument("-iceServerUsername");
         //internal static readonly CommandLineParser.StringArgument IceServerCredential = new CommandLineParser.StringArgument("-iceServerCredential");
 
+        // ================== REMOTE CONTROL =============
+
+        public static readonly CommandLineParser.FlagArgument RemoteControl = new("-remoteControl", false);
+
         // ================== EMULATION ==================
         public static readonly CommandLineParser.EnumArgument<EmulationType> EmulationType = new CommandLineParser.EnumArgument<EmulationType>("-emulationType", Deployment.EmulationType.None);
         public static readonly CommandLineParser.FilePathArgument EmulationFile = new CommandLineParser.FilePathArgument("-emulationFile", Application.persistentDataPath + '\\' + "recordedInputs.inputtrace");

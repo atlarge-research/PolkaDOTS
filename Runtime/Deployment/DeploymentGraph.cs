@@ -113,7 +113,6 @@ namespace PolkaDOTS.Deployment
                     };
                     var worldConfig = node.worldConfigs[i];
 
-                    // world lifecycle: Create -> Start -> Connect (-> Stop)
                     if (worldConfig.initializationMode == InitializationMode.Create)
                     {
                         cRPC.action = ConfigRPCActions.Create;

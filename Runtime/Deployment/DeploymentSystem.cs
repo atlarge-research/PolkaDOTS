@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using PolkaDOTS.Bootstrap;
 using PolkaDOTS.Multiplay;
+using Unity.Assertions;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
 using Unity.Networking.Transport;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 
 namespace PolkaDOTS.Deployment
@@ -396,22 +399,30 @@ namespace PolkaDOTS.Deployment
         [BurstCompile]
         protected override void OnUpdate()
         {
+            // Look up components related to networking
             var connectionLookup = GetComponentLookup<NetworkStreamConnection>();
             var netDriver = SystemAPI.GetSingleton<NetworkStreamDriver>();
 
-            // Send configuration request RPC
+            // Create a new command buffer, which holds ECS actions such as creating, destroying, and adding entities and components,
+            // and will be played back later
             var commandBuffer = new EntityCommandBuffer(Allocator.Temp);
+            // Get all entities with a NetworkID and without a ConfigurationSent component
             foreach (var (netID, entity) in SystemAPI.Query<RefRO<NetworkId>>().WithEntityAccess().WithNone<ConfigurationSent>())
             {
+                // Schedule adding ConfigurationSent components to the newly retrieved entities
                 commandBuffer.AddComponent<ConfigurationSent>(entity);
-                //commandBuffer.AddComponent<NetworkStreamInGame>(entity);
+                // Create a new entity that represents a DeploymentConfiguration request
+                // (this node will ask another node how it needs to be configured)
                 var req = commandBuffer.CreateEntity();
+                // Add to the new entity a component representing the request to receive deployment configuration
+                // Set the nodeID to the current node so that the remote machine knows which configuration to look up
                 commandBuffer.AddComponent(req, new RequestConfigRPC { nodeID = ApplicationConfig.DeploymentID });
+                // Add to the new entity a Unity built-in component that signals to Unity that this entity should be sent as an RPC(?)
                 commandBuffer.AddComponent(req, new SendRpcCommandRequest { TargetConnection = entity });
                 Debug.Log($"Sending configuration request.");
             }
 
-            // Handle received configuration error RPC
+            // Query Unity for RPC errors and handle them
             foreach (var (reqSrc, errorRPC, reqEntity) in SystemAPI
                          .Query<RefRO<ReceiveRpcCommandRequest>, RefRO<ConfigErrorRPC>>()
                          .WithEntityAccess())
@@ -420,25 +431,27 @@ namespace PolkaDOTS.Deployment
                 commandBuffer.DestroyEntity(reqEntity);
             }
 
-            // Handle all received configuration RPCs
+            // Handle all correctly received configuration RPCs
             foreach (var (reqSrc, configRPC, reqEntity) in SystemAPI
                          .Query<RefRO<ReceiveRpcCommandRequest>, RefRO<DeploymentConfigRPC>>()
                          .WithEntityAccess())
             {
                 var connection = connectionLookup[reqSrc.ValueRO.SourceConnection];
-                NetworkEndpoint remoteEndpoint = netDriver.GetRemoteEndPoint(connection);
+                var remoteEndpoint = netDriver.GetRemoteEndPoint(connection);
 
-                DeploymentConfigRPC cRPC = configRPC.ValueRO;
+                var cRPC = configRPC.ValueRO;
 
                 Debug.Log($"[{DateTime.Now.TimeOfDay}]: Received configuration {cRPC.action} RPC on world {cRPC.worldName} with type {cRPC.worldType}:{cRPC.multiplayStreamingRoles} from {remoteEndpoint}");
                 // Mark when we receive the config requests
                 _startTime = World.Time.ElapsedTime;
                 _configReceived = true;
 
-                DeploymentConfigHelpers.HandleDeploymentConfigRPC(cRPC, remoteEndpoint, out NativeList<WorldUnmanaged> newWorlds);
+                DeploymentConfigHelpers.HandleDeploymentConfigRPC(cRPC, remoteEndpoint, out var newWorlds);
 
                 if (!newWorlds.IsEmpty)
+                {
                     GenerateAuthoringSceneLoadRequests(commandBuffer, ref newWorlds);
+                }
 
                 commandBuffer.DestroyEntity(reqEntity);
             }
@@ -449,37 +462,34 @@ namespace PolkaDOTS.Deployment
                          .WithEntityAccess())
             {
                 var connection = connectionLookup[reqSrc.ValueRO.SourceConnection];
-                NetworkEndpoint remoteEndpoint = netDriver.GetRemoteEndPoint(connection);
-
-                WorldActionRPC wRPC = worldActionRPC.ValueRO;
+                var remoteEndpoint = netDriver.GetRemoteEndPoint(connection);
+                var wRPC = worldActionRPC.ValueRO;
 
                 if (!DeploymentConfigHelpers.HandleWorldAction(wRPC, remoteEndpoint))
                 {
                     Debug.Log($"World with name {wRPC.worldName} not found!");
-                    Entity res = commandBuffer.CreateEntity();
+                    var res = commandBuffer.CreateEntity();
                     commandBuffer.AddComponent(res, new ConfigErrorRPC { nodeID = ApplicationConfig.DeploymentID, errorType = ConfigErrorType.UnknownWorld });
                     commandBuffer.AddComponent(res, new SendRpcCommandRequest { TargetConnection = reqSrc.ValueRO.SourceConnection });
                 }
-
 
                 commandBuffer.DestroyEntity(reqEntity);
             }
 
             commandBuffer.Playback(EntityManager);
 
-            if (ApplicationConfig.Duration > 0 && _configReceived && ( World.Time.ElapsedTime - _startTime ) > ApplicationConfig.Duration)
+            if (ApplicationConfig.Duration > 0 && _configReceived && (World.Time.ElapsedTime - _startTime) > ApplicationConfig.Duration)
             {
                 Debug.Log($"[{DateTime.Now.TimeOfDay}]: Experiment duration of {ApplicationConfig.Duration} seconds elapsed! Exiting.");
                 BootstrapInstance.instance.ExitGame();
             }
-
         }
 
         private void GenerateAuthoringSceneLoadRequests(EntityCommandBuffer ecb, ref NativeList<WorldUnmanaged> newWorlds)
         {
             foreach (var world in newWorlds)
             {
-                if (( world.IsClient() || world.IsServer() || world.IsSimulatedClient() ) && !world.IsStreamedClient())
+                if ((world.IsClient() || world.IsServer() || world.IsSimulatedClient()) && !world.IsStreamedClient())
                 {
                     Entity e = ecb.CreateEntity();
                     ecb.AddComponent(e, new LoadAuthoringSceneRequest { world = world });
@@ -515,15 +525,15 @@ namespace PolkaDOTS.Deployment
                 playTypes = GameBootstrap.BootstrapPlayTypes.SimulatedClient;
             }
 
-            var create = ( ConfigRPCActions.Create & cRPC.action ) == ConfigRPCActions.Create;
-            var start = ( ConfigRPCActions.Start & cRPC.action ) == ConfigRPCActions.Start;
-            var connect = ( ConfigRPCActions.Connect & cRPC.action ) == ConfigRPCActions.Connect;
+            var create = (ConfigRPCActions.Create & cRPC.action) != 0;
+            var start = (ConfigRPCActions.Start & cRPC.action) != 0;
+            var connect = (ConfigRPCActions.Connect & cRPC.action) != 0;
 
             // If the node we are connecting to is the deployment node, use its external IP rather than internal
             if (cRPC.serverIP == "source")
             {
-                string addr = sourceConn.WithPort(0).ToString();
-                cRPC.serverIP = addr.Substring(0, addr.Length - 2);
+                var addr = sourceConn.WithPort(0).ToString();
+                cRPC.serverIP = addr[..^2]; // strip ":0" suffix from addr string
                 if (cRPC.serverIP == "127.0.0.1")
                 {
                     cRPC.serverIP = new FixedString64Bytes(ApplicationConfig.ServerUrl.Value);
@@ -531,8 +541,8 @@ namespace PolkaDOTS.Deployment
             }
             if (cRPC.signallingIP == "source")
             {
-                string addr = sourceConn.WithPort(0).ToString();
-                cRPC.signallingIP = addr.Substring(0, addr.Length - 2);
+                var addr = sourceConn.WithPort(0).ToString();
+                cRPC.signallingIP = addr[..^2]; // strip ":0" suffix from addr string
                 if (cRPC.signallingIP == "127.0.0.1")
                 {
                     cRPC.signallingIP = new FixedString64Bytes(ApplicationConfig.SignalingUrl.Value);
@@ -586,8 +596,22 @@ namespace PolkaDOTS.Deployment
                 Debug.Log($"'source' url converted to {connURL}");
             }
 
-            // The interesting bit: what each action actually does
-            switch (wRPC.action)
+            var action = wRPC.action;
+            HandleWorldAction(world, connURL, connPort, action);
+
+            return true;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="world"></param>
+        /// <param name="connURL"></param>
+        /// <param name="connPort"></param>
+        /// <param name="action"></param>
+        public static void HandleWorldAction(World world, string connURL, ushort connPort, WorldAction action)
+        {
+            switch (action)
             {
                 case WorldAction.Stop:
                     // Create an entity with an ExitWorld component in the selected world
@@ -644,8 +668,6 @@ namespace PolkaDOTS.Deployment
                     }
                     break;
             }
-
-            return true;
         }
     }
 
@@ -658,12 +680,52 @@ namespace PolkaDOTS.Deployment
     {
         private HttpListener _httpListener;
         private Task<HttpListenerContext> _request;
+
+        [Serializable]
+        public class RemoteDeploymentRequest
+        {
+            public string role;
+            public string host;
+            public ushort port;
+            public ushort numberOfClients = 1;
+            public string signalingUrl = "ws://127.0.0.1:7981";
+
+            public override string ToString()
+            {
+                return $"role={role},addr={host}:{port},numberOfClients={numberOfClients},signalingUrl={signalingUrl}";
+            }
+        }
+
         protected override void OnCreate()
         {
             _httpListener = new HttpListener();
             // TODO pass uri prefix as config option
+            AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
+        }
+
+        protected override void OnStartRunning()
+        {
             _httpListener.Prefixes.Add("http://*:7982/");
             _httpListener.Start();
+        }
+
+        protected override void OnStopRunning()
+        {
+            StopHttpListener();
+        }
+
+        private void OnProcessExit(object sender, EventArgs e)
+        {
+            StopHttpListener();
+        }
+
+        private void StopHttpListener()
+        {
+            if (_httpListener != null && _httpListener.IsListening)
+            {
+                _httpListener.Stop();
+                _httpListener.Close();
+            }
         }
 
         protected override void OnUpdate()
@@ -678,22 +740,24 @@ namespace PolkaDOTS.Deployment
                 // between local and remote rendering.
                 if (_request.IsCompletedSuccessfully)
                 {
-                    Debug.Log("Got some request!");
                     var result = _request.Result;
                     var request = result.Request;
                     var response = result.Response;
 
+                    RemoteDeploymentRequest req;
                     using (var body = request.InputStream)
                     using (var reader = new System.IO.StreamReader(body, request.ContentEncoding))
                     {
                         var requestBody = reader.ReadToEnd();
-                        Debug.Log("Request Body: " + requestBody);
+                        req = JsonUtility.FromJson<RemoteDeploymentRequest>(requestBody);
                     }
 
                     // Respond to request
                     response.StatusCode = 204;
                     response.ContentLength64 = 0;
                     response.Close();
+
+                    HandleRequest(req);
                 }
                 else
                 {
@@ -705,6 +769,55 @@ namespace PolkaDOTS.Deployment
             if (_request is null || _request.IsCompleted)
             {
                 _request = _httpListener.GetContextAsync();
+            }
+        }
+
+        private void HandleRequest(RemoteDeploymentRequest request)
+        {
+            Debug.Log(request);
+
+            var role = request.role;
+            var serverHost = request.host;
+            var serverPort = request.port;
+            var numSimulatedClients = request.numberOfClients;
+            var signalingUrl = request.signalingUrl;
+
+            var commandBuffer = new EntityCommandBuffer(Allocator.Temp);
+            var worlds = new NativeList<WorldUnmanaged>(16, Allocator.Temp);
+            var worldName = role;
+
+            // TODO check our current role and server we're connected to
+            if (role == "thinClient")
+            {
+            }
+            else if (role == "client")
+            {
+                var bootstrap = BootstrapInstance.instance;
+                bootstrap.SetupWorlds(MultiplayStreamingRoles.Disabled, GameBootstrap.BootstrapPlayTypes.Client,
+                    ref worlds, numSimulatedClients, true, true, serverHost, serverPort, signalingUrl, worldName);
+
+                // TODO loop below should NOT be used when using thin client
+                foreach (var w in worlds)
+                {
+                    var e = commandBuffer.CreateEntity();
+                    commandBuffer.AddComponent(e, new LoadAuthoringSceneRequest { world = w });
+                }
+                commandBuffer.Playback(EntityManager);
+
+                var world = BootstrapInstance.instance.worlds.Find(w => w.Name == worldName);
+                var serverIPs = Dns.GetHostAddresses(serverHost);
+                Assert.IsTrue(serverIPs.Length > 0);
+                DeploymentConfigHelpers.HandleWorldAction(world, serverIPs[0].ToString(), serverPort,
+                    WorldAction.Connect);
+
+                // stop the thin client!
+                // TODO don't GUESS the world name!
+                var thinClientWorld = BootstrapInstance.instance.worlds.Find(w => w.Name == "StreamingGuestWorld");
+                DeploymentConfigHelpers.HandleWorldAction(thinClientWorld, null, 0, WorldAction.Stop);
+            }
+            else
+            {
+                Debug.LogWarning($"Unknown remote deployment request role: {request.role}");
             }
         }
     }

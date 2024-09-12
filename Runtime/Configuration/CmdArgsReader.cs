@@ -25,19 +25,19 @@ namespace PolkaDOTS.Configuration
         // Returns the string array of cmd line arguments from environment, ParrelSync, or an editor GameObject
         private static string[] GetCommandlineArgs()
         {
-            string[] args = new[] { "" };
+            var args = new[] { "" };
 #if UNITY_EDITOR
             // ParrelSync clones can have arguments passed to them in the Clones Manager window
             editorArgs = (EditorCmdArgs)GameObject.FindFirstObjectByType(typeof(EditorCmdArgs));
             if (ClonesManager.IsClone())
             {
                 // Get the custom arguments for this clone project.
-                args = ClonesManager.GetArgument().Split(' ');
+                args = ClonesManager.GetArgument().Trim().Split();
             }
             else
             {
                 // Otherwise, use arguments in editor MonoBehaviour
-                args = editorArgs.editorArgs.Split(' ');
+                args = editorArgs.editorArgs.Trim().Split();
             }
 #else
             // Read from normal command line application arguments
@@ -48,39 +48,43 @@ namespace PolkaDOTS.Configuration
 
         public static bool ParseCmdArgs()
         {
+#if UNITY_EDITOR
+            Debug.Log("Overriding config with editor vars.");
+            // Override PlayType, NumThinClients, ServerAddress, and ServerPort from editor settings
+            var s_PrefsKeyPrefix = $"MultiplayerPlayMode_{Application.productName}_";
+            var s_PlayModeTypeKey = s_PrefsKeyPrefix + "PlayMode_Type";
+            var s_RequestedNumThinClientsKey = s_PrefsKeyPrefix + "NumThinClients";
+            var s_AutoConnectionAddressKey = s_PrefsKeyPrefix + "AutoConnection_Address";
+            var s_AutoConnectionPortKey = s_PrefsKeyPrefix + "AutoConnection_Port";
+            // Editor PlayType
+            var editorPlayType =
+                (ClientServerBootstrap.PlayType)EditorPrefs.GetInt(s_PlayModeTypeKey,
+                    (int)ClientServerBootstrap.PlayType.ClientAndServer);
+            if (ApplicationConfig.PlayType != GameBootstrap.BootstrapPlayTypes.StreamedClient &&
+                ApplicationConfig.PlayType != GameBootstrap.BootstrapPlayTypes.SimulatedClient)
+            {
+                ApplicationConfig.PlayType.SetValue((GameBootstrap.BootstrapPlayTypes)editorPlayType);
+            }
+            // Server address
+            var editorServerAddress = EditorPrefs.GetString(s_AutoConnectionAddressKey, "127.0.0.1");
+            ApplicationConfig.ServerUrl.SetValue(editorServerAddress);
+            //Server port
+            var editorServerPort = EditorPrefs.GetInt(s_AutoConnectionPortKey, 7979);
+            if (editorServerPort != 0)
+            {
+                ApplicationConfig.ServerPort.SetValue(editorServerPort);
+            }
+#endif
+
             var arguments = GetCommandlineArgs();
-            Debug.Log($"Parsing args: {String.Join(", ", arguments)}");
+            Debug.Log($"Parsing args: {string.Join(", ", arguments)}");
             if (!CommandLineParser.TryParse(arguments))
             {
                 Debug.LogError("Parsing command line arguments failed!");
                 return false;
             }
 
-
 #if UNITY_EDITOR
-
-            Debug.Log("Overriding config with editor vars.");
-            // Override PlayType, NumThinClients, ServerAddress, and ServerPort from editor settings
-            string s_PrefsKeyPrefix = $"MultiplayerPlayMode_{Application.productName}_";
-            string s_PlayModeTypeKey = s_PrefsKeyPrefix + "PlayMode_Type";
-            string s_RequestedNumThinClientsKey = s_PrefsKeyPrefix + "NumThinClients";
-            string s_AutoConnectionAddressKey = s_PrefsKeyPrefix + "AutoConnection_Address";
-            string s_AutoConnectionPortKey = s_PrefsKeyPrefix + "AutoConnection_Port";
-            // Editor PlayType
-            ClientServerBootstrap.PlayType editorPlayType =
-                (ClientServerBootstrap.PlayType)EditorPrefs.GetInt(s_PlayModeTypeKey,
-                    (int)ClientServerBootstrap.PlayType.ClientAndServer);
-            if (ApplicationConfig.PlayType != GameBootstrap.BootstrapPlayTypes.StreamedClient &&
-                ApplicationConfig.PlayType != GameBootstrap.BootstrapPlayTypes.SimulatedClient)
-                ApplicationConfig.PlayType.SetValue((GameBootstrap.BootstrapPlayTypes)editorPlayType);
-            // Server address
-            string editorServerAddress = EditorPrefs.GetString(s_AutoConnectionAddressKey, "127.0.0.1");
-            ApplicationConfig.ServerUrl.SetValue(editorServerAddress);
-            //Server port
-            int editorServerPort = EditorPrefs.GetInt(s_AutoConnectionPortKey, 7979);
-            if (editorServerPort != 0)
-                ApplicationConfig.ServerPort.SetValue(editorServerPort);
-
             // Override Deployment ApplicationConfig using this MonoBehaviour's attributes
             if (editorArgs.useDeploymentConfig && !ClonesManager.IsClone())
             {
@@ -94,7 +98,6 @@ namespace PolkaDOTS.Configuration
                     ApplicationConfig.ImportDeploymentConfig.SetValue(JsonConvert.DeserializeObject<JsonDeploymentConfig>(editorArgs.deploymentConfig));
                 }
             }
-
 #endif
 
             // Sanity checks

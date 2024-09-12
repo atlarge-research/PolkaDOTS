@@ -97,6 +97,18 @@ namespace PolkaDOTS.Bootstrap
                 SetupWorldsFromLocalConfig();
             }
 
+            // Add a new world with a remote control system if specified in command-line arguments
+            if (ApplicationConfig.RemoteControl)
+            {
+                var rcWorld = new World("remoteControlWorld", WorldFlags.None);
+                var systems = new NativeList<SystemTypeIndex>(64, Allocator.Temp)
+                {
+                    TypeManager.GetSystemTypeIndex(typeof(RemoteControlledDeploymentSystem))
+                };
+                DefaultWorldInitialization.AddSystemsToRootLevelSystemGroups(rcWorld, systems);
+                ScriptBehaviourUpdateOrder.AppendWorldToCurrentPlayerLoop(rcWorld);
+            }
+
             return true;
         }
 
@@ -137,9 +149,6 @@ namespace PolkaDOTS.Bootstrap
             // Add deployment service systems
             var deploymentClassType = ApplicationConfig.GetRemoteConfig ? typeof(DeploymentReceiveSystem) : typeof(DeploymentServiceSystem);
             filteredSystems.Add(TypeManager.GetSystemTypeIndex(deploymentClassType));
-
-            // Add a remote control deployment system
-            filteredSystems.Add(TypeManager.GetSystemTypeIndex(typeof(RemoteControlledDeploymentSystem)));
 
             // Add Unity Scene System for managing GUIDs
             filteredSystems.Add(TypeManager.GetSystemTypeIndex(typeof(SceneSystem)));
@@ -322,7 +331,7 @@ namespace PolkaDOTS.Bootstrap
                         new NetworkStreamRequestConnect { Endpoint = gameEndpoint });
                 }
                 // Streamed guest client worlds
-                if (( playTypes == BootstrapPlayTypes.Client || playTypes == BootstrapPlayTypes.ClientAndServer )
+                if ((playTypes == BootstrapPlayTypes.Client || playTypes == BootstrapPlayTypes.ClientAndServer)
                     && mRole == MultiplayStreamingRoles.Guest
                     && world.IsStreamedClient())
                 {
@@ -345,7 +354,7 @@ namespace PolkaDOTS.Bootstrap
                         new NetworkStreamRequestConnect { Endpoint = gameEndpoint });
                 }
                 // Server worlds
-                if (( playTypes == BootstrapPlayTypes.Server || playTypes == BootstrapPlayTypes.ClientAndServer )
+                if ((playTypes == BootstrapPlayTypes.Server || playTypes == BootstrapPlayTypes.ClientAndServer)
                     && world.IsServer())
                 {
                     Entity connReq = world.EntityManager.CreateEntity();
