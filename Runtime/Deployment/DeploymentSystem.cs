@@ -794,9 +794,14 @@ namespace PolkaDOTS.Deployment
             }
             else if (role == "client")
             {
+                // Stop the running thin client world
+                var thinClientWorld = BootstrapInstance.instance.worlds.Find(w => w.Name == "StreamingGuestWorld");
+                DeploymentConfigHelpers.HandleWorldAction(thinClientWorld, null, 0, WorldAction.Stop);
+
+                // Create, start, and connect a regular client world
                 var bootstrap = BootstrapInstance.instance;
                 bootstrap.SetupWorlds(MultiplayStreamingRoles.Disabled, GameBootstrap.BootstrapPlayTypes.Client,
-                    ref worlds, numSimulatedClients, true, true, serverIP, serverPort, signalingUrl, worldName);
+                    ref worlds, numSimulatedClients, autoStart: true, autoConnect: true, serverIP, serverPort, signalingUrl, worldName);
 
                 // TODO loop below should NOT be used when using thin client
                 foreach (var w in worlds)
@@ -805,17 +810,6 @@ namespace PolkaDOTS.Deployment
                     commandBuffer.AddComponent(e, new LoadAuthoringSceneRequest { world = w });
                 }
                 commandBuffer.Playback(EntityManager);
-
-                var world = BootstrapInstance.instance.worlds.Find(w => w.Name == worldName);
-                Debug.Log(world.Name);
-                // FIXME Calling HandleWorldAction leads to bug pasted in notes file 2024-09-12
-                DeploymentConfigHelpers.HandleWorldAction(world, serverIP, serverPort,
-                    WorldAction.Connect);
-
-                // // stop the thin client!
-                // // TODO don't GUESS the world name!
-                // var thinClientWorld = BootstrapInstance.instance.worlds.Find(w => w.Name == "StreamingGuestWorld");
-                // DeploymentConfigHelpers.HandleWorldAction(thinClientWorld, null, 0, WorldAction.Stop);
             }
             else
             {

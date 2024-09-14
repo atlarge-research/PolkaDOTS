@@ -52,7 +52,7 @@ namespace PolkaDOTS.Bootstrap
             // If there is a start delay, wait to perform bootstrap initialization
             if (ApplicationConfig.Delay.Value > 0)
             {
-                int milliseconds = ApplicationConfig.Delay.Value * 1000;
+                var milliseconds = ApplicationConfig.Delay.Value * 1000;
                 Thread.Sleep(milliseconds);
             }
 
@@ -72,21 +72,21 @@ namespace PolkaDOTS.Bootstrap
                     // Deployment client
                     // Parse deployment network endpoint
                     if (!NetworkEndpoint.TryParse(ApplicationConfig.DeploymentURL, (ushort)ApplicationConfig.DeploymentPort,
-                            out NetworkEndpoint deploymentEndpoint,
+                            out var deploymentEndpoint,
                             NetworkFamily.Ipv4))
                     {
                         Debug.Log($"Couldn't parse deployment URL of {ApplicationConfig.DeploymentURL}:{ApplicationConfig.DeploymentPort}, falling back to 127.0.0.1!");
                         deploymentEndpoint = NetworkEndpoint.LoopbackIpv4.WithPort((ushort)ApplicationConfig.DeploymentPort);
                     }
 
-                    Entity connReq = deploymentWorld.EntityManager.CreateEntity();
+                    var connReq = deploymentWorld.EntityManager.CreateEntity();
                     deploymentWorld.EntityManager.AddComponentData(connReq,
                         new NetworkStreamRequestConnect { Endpoint = deploymentEndpoint });
                 }
                 else
                 {
                     // Deployment server
-                    Entity listenReq = deploymentWorld.EntityManager.CreateEntity();
+                    var listenReq = deploymentWorld.EntityManager.CreateEntity();
                     deploymentWorld.EntityManager.AddComponentData(listenReq,
                         new NetworkStreamRequestListen { Endpoint = NetworkEndpoint.AnyIpv4.WithPort((ushort)ApplicationConfig.DeploymentPort) });
                 }
@@ -106,7 +106,7 @@ namespace PolkaDOTS.Bootstrap
                     TypeManager.GetSystemTypeIndex(typeof(RemoteControlledDeploymentSystem))
                 };
                 DefaultWorldInitialization.AddSystemsToRootLevelSystemGroups(rcWorld, systems);
-                ScriptBehaviourUpdateOrder.AppendWorldToCurrentPlayerLoop(rcWorld);
+                SetWorldToUpdating(rcWorld);
             }
 
             return true;
@@ -175,7 +175,7 @@ namespace PolkaDOTS.Bootstrap
 
         public void SetupWorldsFromLocalConfig()
         {
-            NativeList<WorldUnmanaged> newWorlds = new NativeList<WorldUnmanaged>(Allocator.Temp);
+            var newWorlds = new NativeList<WorldUnmanaged>(Allocator.Temp);
             SetupWorlds(ApplicationConfig.MultiplayStreamingRole, ApplicationConfig.PlayType, ref newWorlds,
                 ApplicationConfig.NumSimulatedPlayers, autoStart: true, autoConnect: true, ApplicationConfig.ServerUrl, (ushort)ApplicationConfig.ServerPort, ApplicationConfig.SignalingUrl);
         }
@@ -190,7 +190,7 @@ namespace PolkaDOTS.Bootstrap
 
             Debug.Log($"Setting up worlds with playType {playTypes} and streaming role {mRole}");
 
-            List<World> newWorlds = new List<World>();
+            var newWorlds = new List<World>();
 
             // ================== SETUP WORLDS ==================
 
@@ -241,12 +241,16 @@ namespace PolkaDOTS.Bootstrap
                 worlds.Add(world);
 
                 if (autoStart)
+                {
                     SetWorldToUpdating(world);
+                }
             }
 
 
             if (autoConnect)
+            {
                 ConnectWorlds(mRole, playTypes, serverUrl, serverPort, signalingUrl);
+            }
         }
 
 
@@ -321,11 +325,11 @@ namespace PolkaDOTS.Bootstrap
                     && world.IsClient() && !world.IsSimulatedClient() && !world.IsStreamedClient()
                     && mRole != MultiplayStreamingRoles.Guest)
                 {
-                    Entity connReq = world.EntityManager.CreateEntity();
+                    var connReq = world.EntityManager.CreateEntity();
                     var ips = Dns.GetHostAddresses(serverUrl);
                     Assert.IsTrue(ips.Length > 0);
                     NetworkEndpoint.TryParse(ips[0].ToString(), serverPort,
-                        out NetworkEndpoint gameEndpoint, NetworkFamily.Ipv4);
+                        out var gameEndpoint, NetworkFamily.Ipv4);
                     Debug.Log($"Created connection request for {gameEndpoint}");
                     world.EntityManager.AddComponentData(connReq,
                         new NetworkStreamRequestConnect { Endpoint = gameEndpoint });
@@ -335,7 +339,7 @@ namespace PolkaDOTS.Bootstrap
                     && mRole == MultiplayStreamingRoles.Guest
                     && world.IsStreamedClient())
                 {
-                    Entity connReq = world.EntityManager.CreateEntity();
+                    var connReq = world.EntityManager.CreateEntity();
 
                     Debug.Log($"Creating multiplay guest connect with endpoint {signalingUrl}");
                     world.EntityManager.AddComponentData(connReq,
@@ -344,7 +348,7 @@ namespace PolkaDOTS.Bootstrap
                 // Simulated client worlds
                 if (playTypes == BootstrapPlayTypes.SimulatedClient && world.IsSimulatedClient())
                 {
-                    Entity connReq = world.EntityManager.CreateEntity();
+                    var connReq = world.EntityManager.CreateEntity();
                     var ips = Dns.GetHostAddresses(serverUrl);
                     Assert.IsTrue(ips.Length > 0);
                     NetworkEndpoint.TryParse(ips[0].ToString(), serverPort,
@@ -357,7 +361,7 @@ namespace PolkaDOTS.Bootstrap
                 if ((playTypes == BootstrapPlayTypes.Server || playTypes == BootstrapPlayTypes.ClientAndServer)
                     && world.IsServer())
                 {
-                    Entity connReq = world.EntityManager.CreateEntity();
+                    var connReq = world.EntityManager.CreateEntity();
                     var listenNetworkEndpoint = NetworkEndpoint.AnyIpv4.WithPort(serverPort);
                     Debug.Log($"Created listen request for {listenNetworkEndpoint}");
                     world.EntityManager.AddComponentData(connReq,
