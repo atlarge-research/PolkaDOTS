@@ -11,14 +11,14 @@ namespace PolkaDOTS.Deployment
     {
         public EntitySceneReference SceneReference;
     }
-    
+
     public struct LoadAuthoringSceneRequest : IComponentData
     {
         public WorldUnmanaged world;
     }
 
 #if UNITY_EDITOR
-// Authoring component, a SceneAsset can only be used in the Editor
+    // Authoring component, a SceneAsset can only be used in the Editor
     public class SceneLoader : MonoBehaviour
     {
         public UnityEditor.SceneAsset Scene;
@@ -27,7 +27,7 @@ namespace PolkaDOTS.Deployment
         {
             public override void Bake(SceneLoader authoring)
             {
-                
+
                 Debug.Log($"Run authoring scene baking!");
                 var reference = new EntitySceneReference(authoring.Scene);
                 var entity = GetEntity(TransformUsageFlags.None);
@@ -39,7 +39,7 @@ namespace PolkaDOTS.Deployment
         }
     }
 #endif
-    
+
     /// <summary>
     /// Run in Deployment world to call scene loads on created worlds. Fix for inconsistent authoring scene loading.
     /// There is likely a better method.
@@ -60,13 +60,13 @@ namespace PolkaDOTS.Deployment
 
         protected override void OnUpdate()
         {
-            var requests = newRequests.ToComponentDataArray<LoadAuthoringSceneRequest >(Allocator.Temp);
+            var requests = newRequests.ToComponentDataArray<LoadAuthoringSceneRequest>(Allocator.Temp);
             var authoringScenes = authoringSceneQuery.ToComponentDataArray<AuthoringSceneReference>(Allocator.Temp);
 
             // Can't use a foreach with a query as SceneSystem.LoadSceneAsync does structural changes
-            for (int i = 0; i < requests.Length; i += 1)
+            for (var i = 0; i < requests.Length; i += 1)
             {
-                WorldUnmanaged world = requests[i].world;
+                var world = requests[i].world;
                 Debug.Log($"Loading authoring scene in world {world.Name}");
                 SceneSystem.LoadSceneAsync(world, authoringScenes[0].SceneReference);
             }
@@ -76,11 +76,11 @@ namespace PolkaDOTS.Deployment
             EntityManager.DestroyEntity(newRequests);
         }
     }
-    
+
     /// <summary>
     /// Run in all worlds to spawn the authoring scene within this world, without needing the deployment service.
     /// </summary>
-    [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation | WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ThinClientSimulation)] 
+    [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation | WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ThinClientSimulation)]
     [UpdateInGroup(typeof(InitializationSystemGroup))]
     [RequireMatchingQueriesForUpdate]
     public partial class AutoAuthoringSceneLoaderSystem : SystemBase
@@ -97,7 +97,7 @@ namespace PolkaDOTS.Deployment
             var authoringScenes = authoringSceneQuery.ToComponentDataArray<AuthoringSceneReference>(Allocator.Temp);
             Debug.Log($"AutoLoading authoring scene in world {World.Unmanaged.Name}");
             SceneSystem.LoadSceneAsync(World.Unmanaged, authoringScenes[0].SceneReference);
-            
+
             authoringScenes.Dispose();
             EntityManager.DestroyEntity(authoringSceneQuery);
             Enabled = false;

@@ -485,7 +485,7 @@ namespace PolkaDOTS.Deployment
             }
         }
 
-        private void GenerateAuthoringSceneLoadRequests(EntityCommandBuffer ecb, ref NativeList<WorldUnmanaged> newWorlds)
+        public static void GenerateAuthoringSceneLoadRequests(EntityCommandBuffer ecb, ref NativeList<WorldUnmanaged> newWorlds)
         {
             foreach (var world in newWorlds)
             {
@@ -802,13 +802,7 @@ namespace PolkaDOTS.Deployment
                 var bootstrap = BootstrapInstance.instance;
                 bootstrap.SetupWorlds(MultiplayStreamingRoles.Disabled, GameBootstrap.BootstrapPlayTypes.Client,
                     ref worlds, numSimulatedClients, autoStart: true, autoConnect: true, serverIP, serverPort, signalingUrl, worldName);
-
-                // TODO loop below should NOT be used when using thin client
-                foreach (var w in worlds)
-                {
-                    var e = commandBuffer.CreateEntity();
-                    commandBuffer.AddComponent(e, new LoadAuthoringSceneRequest { world = w });
-                }
+                DeploymentReceiveSystem.GenerateAuthoringSceneLoadRequests(commandBuffer, ref worlds);
                 commandBuffer.Playback(EntityManager);
             }
             else

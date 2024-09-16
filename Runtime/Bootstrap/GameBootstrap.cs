@@ -16,6 +16,8 @@ using Unity.NetCode;
 using Unity.Networking.Transport;
 using Unity.Scenes;
 using UnityEngine;
+using System.Linq;
+
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -63,7 +65,7 @@ namespace PolkaDOTS.Bootstrap
             BootstrapInstance.instance = this;
             NetworkStreamReceiveSystem.DriverConstructor = new NetCodeDriverConstructor();
             // Deployment world handles both requesting and answering configuration requests
-            if (ApplicationConfig.GetRemoteConfig || ApplicationConfig.ImportDeploymentConfig.Value is not null)
+            if (ApplicationConfig.RemoteControl || ApplicationConfig.GetRemoteConfig || ApplicationConfig.ImportDeploymentConfig.Value is not null)
             {
                 deploymentWorld = SetupDeploymentServiceWorld();
                 // Create connection listen/connect request in deployment world
@@ -95,18 +97,6 @@ namespace PolkaDOTS.Bootstrap
             {
                 // Use only local configuration
                 SetupWorldsFromLocalConfig();
-            }
-
-            // Add a new world with a remote control system if specified in command-line arguments
-            if (ApplicationConfig.RemoteControl)
-            {
-                var rcWorld = new World("remoteControlWorld", WorldFlags.None);
-                var systems = new NativeList<SystemTypeIndex>(64, Allocator.Temp)
-                {
-                    TypeManager.GetSystemTypeIndex(typeof(RemoteControlledDeploymentSystem))
-                };
-                DefaultWorldInitialization.AddSystemsToRootLevelSystemGroups(rcWorld, systems);
-                SetWorldToUpdating(rcWorld);
             }
 
             return true;
@@ -158,6 +148,9 @@ namespace PolkaDOTS.Bootstrap
             // Add AuthoringSceneLoader
             filteredSystems.Add(TypeManager.GetSystemTypeIndex(typeof(AuthoringSceneLoaderSystem)));
 
+            // Add remote control system
+            filteredSystems.Add(TypeManager.GetSystemTypeIndex(typeof(RemoteControlledDeploymentSystem)));
+
             // Re-sort the systems
             TypeManager.SortSystemTypesInCreationOrder(filteredSystems);
 
@@ -166,8 +159,7 @@ namespace PolkaDOTS.Bootstrap
 
             ScriptBehaviourUpdateOrder.AppendWorldToCurrentPlayerLoop(world);
 
-            if (World.DefaultGameObjectInjectionWorld == null)
-                World.DefaultGameObjectInjectionWorld = world;
+            World.DefaultGameObjectInjectionWorld ??= world;
 
             return world;
         }
@@ -187,7 +179,6 @@ namespace PolkaDOTS.Bootstrap
         public void SetupWorlds(MultiplayStreamingRoles mRole, BootstrapPlayTypes playTypes, ref NativeList<WorldUnmanaged> worldReferences,
             int numSimulatedClients, bool autoStart, bool autoConnect, string serverUrl, ushort serverPort, string signalingUrl, string worldName = "")
         {
-
             Debug.Log($"Setting up worlds with playType {playTypes} and streaming role {mRole}");
 
             var newWorlds = new List<World>();
@@ -245,7 +236,6 @@ namespace PolkaDOTS.Bootstrap
                     SetWorldToUpdating(world);
                 }
             }
-
 
             if (autoConnect)
             {
@@ -352,7 +342,7 @@ namespace PolkaDOTS.Bootstrap
                     var ips = Dns.GetHostAddresses(serverUrl);
                     Assert.IsTrue(ips.Length > 0);
                     NetworkEndpoint.TryParse(ips[0].ToString(), serverPort,
-                        out NetworkEndpoint gameEndpoint, NetworkFamily.Ipv4);
+                        out var gameEndpoint, NetworkFamily.Ipv4);
                     Debug.Log($"Created connection request for {gameEndpoint}");
                     world.EntityManager.AddComponentData(connReq,
                         new NetworkStreamRequestConnect { Endpoint = gameEndpoint });
@@ -367,31 +357,36 @@ namespace PolkaDOTS.Bootstrap
                     world.EntityManager.AddComponentData(connReq,
                         new NetworkStreamRequestListen { Endpoint = listenNetworkEndpoint });
                 }
-
             }
         }
 
         public World CreateDefaultClientWorld(string worldName, bool isHost = false, bool isCloudHost = false)
         {
-            WorldSystemFilterFlags flags = WorldSystemFilterFlags.ClientSimulation |
-                                           WorldSystemFilterFlags.Presentation;
+            var flags = WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.Presentation;
             // If we aren't running graphics on this client (e.g. a simulated player) then don't run presentation systems.
             if (ApplicationConfig.NoGraphics.Value)
             {
                 flags = WorldSystemFilterFlags.ClientSimulation;
             }
+
             var clientSystems = DefaultWorldInitialization.GetAllSystems(flags);
             // Disable the default NetCode world configuration
             var filteredClientSystems = new List<Type>();
             foreach (var system in clientSystems)
             {
                 if (system.Name == "ConfigureThinClientWorldSystem" || system.Name == "ConfigureClientWorldSystem")
+                {
                     continue;
+                }
+
                 if (system.IsDefined(typeof(UniqueSystemAttribute), false))
                 {
                     Debug.Log($"Adding type with UniqueSystemAttribute: {system.Name}");
                     if (_uniqueSystemTypes.Contains(system))
+                    {
                         continue;
+                    }
+
                     _uniqueSystemTypes.Add(system);
                 }
                 filteredClientSystems.Add(system);
@@ -400,24 +395,32 @@ namespace PolkaDOTS.Bootstrap
             if (isHost)
             {
                 if (worldName == "")
+                {
                     worldName = "HostClientWorld";
+                }
+
                 return CreateClientWorld(worldName, (WorldFlags)WorldFlagsExtension.HostClient,
                     filteredClientSystems);
             }
             else if (isCloudHost)
             {
                 if (worldName == "")
+                {
                     worldName = "CloudHostClientWorld";
+                }
+
                 return CreateClientWorld(worldName, (WorldFlags)WorldFlagsExtension.CloudHostClient,
                     filteredClientSystems);
             }
             else
             {
                 if (worldName == "")
+                {
                     worldName = "ClientWorld";
+                }
+
                 return CreateClientWorld(worldName, WorldFlags.GameClient, filteredClientSystems);
             }
-
         }
 
         public World CreateStreamedClientWorld(string worldName)
@@ -429,20 +432,26 @@ namespace PolkaDOTS.Bootstrap
                 if (system.IsDefined(typeof(UniqueSystemAttribute), false))
                 {
                     if (_uniqueSystemTypes.Contains(system))
+                    {
                         continue;
+                    }
+
                     _uniqueSystemTypes.Add(system);
                 }
                 filteredClientSystems.Add(system);
             }
             if (worldName == "")
+            {
                 worldName = "StreamingGuestWorld";
+            }
+
             return CreateClientWorld(worldName, (WorldFlags)WorldFlagsExtension.StreamedClient, filteredClientSystems);
         }
 
 
         public List<World> CreateSimulatedClientWorlds(int numSimulatedClients, string worldName)
         {
-            List<World> newWorlds = new List<World>();
+            var newWorlds = new List<World>();
 
             // Re-use Netcode for EntitiesSim ThinClient systems
             //var thinClientSystems = DefaultWorldInitialization.GetAllSystems(WorldSystemFilterFlags.ThinClientSimulation);
@@ -454,11 +463,17 @@ namespace PolkaDOTS.Bootstrap
             foreach (var system in thinClientSystems)
             {
                 if (system.Name is "ConfigureThinClientWorldSystem" or "ConfigureClientWorldSystem")
+                {
                     continue;
+                }
+
                 if (system.IsDefined(typeof(UniqueSystemAttribute), false))
                 {
                     if (_uniqueSystemTypes.Contains(system))
+                    {
                         continue;
+                    }
+
                     _uniqueSystemTypes.Add(system);
                     filteredThinClientSystemsWithUnique.Add(system);
                     continue;
@@ -469,7 +484,10 @@ namespace PolkaDOTS.Bootstrap
 
 
             if (worldName == "")
+            {
                 worldName = "SimulatedClientWorld_";
+            }
+
             for (var i = 0; i < numSimulatedClients; i++)
             {
                 List<Type> systems;
@@ -529,13 +547,8 @@ namespace PolkaDOTS.Bootstrap
         public World CreateClientWorld(string name, WorldFlags flags, IReadOnlyList<Type> systems)
         {
             var world = new World(name, flags);
-
             DefaultWorldInitialization.AddSystemsToRootLevelSystemGroups(world, systems);
-
-
-            if (World.DefaultGameObjectInjectionWorld == null)
-                World.DefaultGameObjectInjectionWorld = world;
-
+            World.DefaultGameObjectInjectionWorld ??= world;
             return world;
         }
 

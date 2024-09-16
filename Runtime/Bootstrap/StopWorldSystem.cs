@@ -45,13 +45,13 @@ namespace PolkaDOTS
                 {
                     // Cleanup Multiplay
                     var multiplay = MultiplaySingleton.Instance;
-                    if (multiplay is not null)
+                    if (multiplay != null)
                     {
                         multiplay.StopMultiplay();
                     }
                     // Stop emulation
                     Emulation.Emulation emulation = EmulationSingleton.Instance;
-                    if (emulation is not null)
+                    if (emulation != null)
                     {
                         emulation.Pause();
                     }

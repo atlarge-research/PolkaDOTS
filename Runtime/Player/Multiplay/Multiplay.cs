@@ -18,12 +18,6 @@ namespace PolkaDOTS.Multiplay
     public class Multiplay : SignalingHandlerBase,
         IOfferHandler, IAddChannelHandler, IDisconnectHandler, IDeletedConnectionHandler, IConnectHandler
     {
-        private void Awake()
-        {
-            defaultCamera.SetActive(false);
-            _initialized = false;
-        }
-
         public SignalingManager renderStreaming;
         public GameObject guestPrefab;
         public GameObject playerPrefab;
@@ -36,21 +30,30 @@ namespace PolkaDOTS.Multiplay
         private SignalingHandlerBase currentHandler;
         private GameObject currentPlayerObj;
 
-        private List<string> connectionIds = new List<string>();
-        private List<Component> streams = new List<Component>();
-        public HashSet<string> disconnectedIds = new HashSet<string>();
+        private List<string> connectionIds = new();
+        private List<Component> streams = new();
+        public HashSet<string> disconnectedIds = new();
 
-        public Dictionary<string, GameObject> connectionPlayerObjects = new Dictionary<string, GameObject>();
+        public Dictionary<string, GameObject> connectionPlayerObjects = new();
 
         private MultiplaySettings settings;
-        
-        private Vector3 initialPosition = new Vector3(0, 40, -4);
+
+        private Vector3 initialPosition = new(0, 40, -4);
+
+
+        private void Awake()
+        {
+            defaultCamera.SetActive(false);
+            _initialized = false;
+        }
 
         public void InitSettings()
         {
             if (_initialized)
+            {
                 return;
-            
+            }
+
             // Fetch the settings on awake
             MultiplaySettingsManager.Instance.Initialize();
             settings = MultiplaySettingsManager.Instance.Settings;
@@ -98,7 +101,9 @@ namespace PolkaDOTS.Multiplay
             streams.Remove(inputChannel);
 
             if (ExistConnection(connectionId))
+            {
                 DeleteConnection(connectionId);
+            }
         }
 
 
@@ -116,7 +121,7 @@ namespace PolkaDOTS.Multiplay
             // Spawn object with camera and input component at a default location. This object will be synced
             // with player transform on clients by PlayerInputSystem. These objects do not exist on the server.
             var playerObj = Instantiate(playerPrefab, initialPosition, Quaternion.identity);
-            
+
             connectionPlayerObjects.Add(data.connectionId, playerObj);
 
             var videoChannel = playerObj.GetComponent<StreamSenderBase>();
@@ -152,13 +157,13 @@ namespace PolkaDOTS.Multiplay
         {
             Debug.Log("Creating local player object");
             Cursor.lockState = CursorLockMode.Locked;
-            
+
             // We need to setup local input devices on local players
             var hostPlayerObj = Instantiate(playerPrefab, initialPosition, Quaternion.identity);
             var playerInput = hostPlayerObj.GetComponent<InputReceiver>();
             playerInput.PerformPairingWithAllLocalDevices();
-            
-            
+
+
             connectionPlayerObjects.Add("LOCALPLAYER", hostPlayerObj);
 
             currentPlayerObj = hostPlayerObj;
@@ -167,15 +172,15 @@ namespace PolkaDOTS.Multiplay
         public void SetUpHost(bool cloudOnly = false)
         {
             // Cloud only hosts do not run a local player
-            if(!cloudOnly)
+            if (!cloudOnly)
                 SetUpLocalPlayer();
-            
+
             if (!settings.MultiplayEnabled)
             {
                 Debug.Log("SetUpHost called but Multiplay disabled.");
                 return;
             }
-                
+
             renderStreaming.useDefaultSettings = false;
             Debug.Log($"Setting up multiplay host with signaling at {settings.SignalingAddress}");
             renderStreaming.SetSignalingSettings(settings.SignalingSettings);
@@ -196,7 +201,7 @@ namespace PolkaDOTS.Multiplay
             settings.SignalingAddress = url;
             StartCoroutine(ConnectGuest());
         }
-        
+
         public void OnConnect(SignalingEventData data)
         {
             //Debug.Log($"Disconnecting {eventData.connectionId}");
@@ -210,28 +215,28 @@ namespace PolkaDOTS.Multiplay
             var guestPlayer = Instantiate(guestPrefab);
             var handler = guestPlayer.GetComponent<SingleConnection>();
             statsUI.AddSignalingHandler(handler);
-            
+
             renderStreaming.useDefaultSettings = false;
             renderStreaming.SetSignalingSettings(settings.SignalingSettings);
             Debug.Log($"[{DateTime.Now.TimeOfDay.ToString()}] Setting up multiplay guest with signaling at {settings.SignalingAddress}");
             renderStreaming.Run(handlers: new SignalingHandlerBase[] { handler });
-            
-            
-            
+
+
+
             // Enable the video output
             videoImage.gameObject.SetActive(true);
             var receiveVideoViewer = guestPlayer.GetComponent<VideoStreamReceiver>();
             receiveVideoViewer.OnUpdateReceiveTexture += texture => videoImage.texture = texture;
-            
+
             if (settings != null)
                 receiveVideoViewer.SetCodec(settings.ReceiverVideoCodec);
-            
+
             Cursor.lockState = CursorLockMode.Locked;
-            
+
             yield return new WaitUntil(() => handler.WSConnected());
-            
+
             handler.CreateConnection(connectionId);
-            
+
             yield return new WaitUntil(() => handler.IsConnected(connectionId));
             guestConnected = true;
             currentHandler = handler;
@@ -264,19 +269,19 @@ namespace PolkaDOTS.Multiplay
                 connectionPlayerObjects.Clear();
             }
             // Destroy instantiated gameobjects
-            if (currentPlayerObj is not null)
+            if (currentPlayerObj != null)
             {
                 Destroy(currentPlayerObj);
             }
             statsUI.RemoveSignalingHandler(currentHandler);
             renderStreaming.RemoveSignalingHandler(currentHandler);
-            
+
             // restore default camera setup
             videoImage.gameObject.SetActive(false);
             //defaultCamera.SetActive(true);
         }
     }
-    
-    
+
+
 
 }
