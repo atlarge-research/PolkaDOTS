@@ -491,7 +491,7 @@ namespace PolkaDOTS.Deployment
             {
                 if ((world.IsClient() || world.IsServer() || world.IsSimulatedClient()) && !world.IsStreamedClient())
                 {
-                    Entity e = ecb.CreateEntity();
+                    var e = ecb.CreateEntity();
                     ecb.AddComponent(e, new LoadAuthoringSceneRequest { world = world });
                 }
             }
