@@ -107,6 +107,10 @@ namespace PolkaDOTS.Multiplay
         }
 
 
+        /// <summary>
+        /// This runs on RenderStreaming nodes, between thin clients and servers.
+        /// </summary>
+        /// <param name="data"></param>
         public void OnOffer(SignalingEventData data)
         {
             Debug.Log($"Received streaming connection with id {data.connectionId}");
@@ -162,7 +166,6 @@ namespace PolkaDOTS.Multiplay
             var hostPlayerObj = Instantiate(playerPrefab, initialPosition, Quaternion.identity);
             var playerInput = hostPlayerObj.GetComponent<InputReceiver>();
             playerInput.PerformPairingWithAllLocalDevices();
-
 
             connectionPlayerObjects.Add("LOCALPLAYER", hostPlayerObj);
 

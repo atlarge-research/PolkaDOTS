@@ -11,8 +11,8 @@ namespace PolkaDOTS.Networking
     public struct StartGameStreamRequest : IRpcCommand
     {
     }
-    
-    public struct StartGameStreamDelay: IComponentData
+
+    public struct StartGameStreamDelay : IComponentData
     {
         public int delay;
     }
@@ -41,7 +41,7 @@ namespace PolkaDOTS.Networking
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            
+
             if (state.WorldUnmanaged.IsSimulatedClient())
             {
                 StartGameStreamDelay startGameStreamDelay = SystemAPI.GetSingleton<StartGameStreamDelay>();
@@ -77,17 +77,17 @@ namespace PolkaDOTS.Networking
         {
             state.RequireForUpdate<GhostRelevancy>();
             state.RequireForUpdate<GhostSendSystemData>();
-           // state.RequireForUpdate<PlayerSpawner>();
+            // state.RequireForUpdate<PlayerSpawner>();
             var builder = new EntityQueryBuilder(Allocator.Temp)
                 .WithAll<StartGameStreamRequest>()
                 .WithAll<ReceiveRpcCommandRequest>();
             state.RequireForUpdate(state.GetEntityQuery(builder));
             networkIdFromEntity = state.GetComponentLookup<NetworkId>(true);
-            
+
             // Set some networking configuration parameters
             var ghostSendSystemData = SystemAPI.GetSingleton<GhostSendSystemData>();
             ghostSendSystemData.FirstSendImportanceMultiplier = 2;
-            
+
             // Component used on server to tell the ghost synchronization system to ignore certain ghosts
             // for specific connections, specified through GhostRelevancySet
             var ghostRelevancy = SystemAPI.GetSingleton<GhostRelevancy>();
