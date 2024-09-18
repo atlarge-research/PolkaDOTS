@@ -776,7 +776,7 @@ namespace PolkaDOTS.Deployment
             Debug.Log(request);
 
             var worldName = request.role;
-            var worldToStop = worldName == "ClientWorld" ? "StreamingGuestWorld" : "ClientWorld";
+            var worldToStopStr = worldName == "ClientWorld" ? "StreamingGuestWorld" : "ClientWorld";
             // Translate Hostname to IP address immediately because most of the code cannot handle hostnames
             // TODO error handling
             var serverIP = request.ipv4;
@@ -808,8 +808,8 @@ namespace PolkaDOTS.Deployment
             }
 
             // Stop the running world
-            var thinClientWorld = BootstrapInstance.instance.worlds.Find(w => w.Name == worldToStop);
-            DeploymentConfigHelpers.HandleWorldAction(thinClientWorld, null, 0, WorldAction.Stop);
+            var worldToStop = BootstrapInstance.instance.worlds.Find(w => w.Name == worldToStopStr);
+            DeploymentConfigHelpers.HandleWorldAction(worldToStop, null, 0, WorldAction.Stop);
 
             // Create, start, and connect a new world
             var bootstrap = BootstrapInstance.instance;
