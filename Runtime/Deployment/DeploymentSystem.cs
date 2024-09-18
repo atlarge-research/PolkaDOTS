@@ -790,7 +790,6 @@ namespace PolkaDOTS.Deployment
 
             MultiplayStreamingRoles msr;
 
-            // TODO check our current role and server we're connected to
             if (worldName == "StreamingGuestWorld")
             {
                 msr = MultiplayStreamingRoles.Guest;
@@ -808,11 +807,11 @@ namespace PolkaDOTS.Deployment
                 return;
             }
 
-            // Stop the running thin client world
+            // Stop the running world
             var thinClientWorld = BootstrapInstance.instance.worlds.Find(w => w.Name == worldToStop);
             DeploymentConfigHelpers.HandleWorldAction(thinClientWorld, null, 0, WorldAction.Stop);
 
-            // Create, start, and connect a regular client world
+            // Create, start, and connect a new world
             var bootstrap = BootstrapInstance.instance;
             bootstrap.SetupWorlds(msr, GameBootstrap.BootstrapPlayTypes.Client, ref worlds, numSimulatedClients, autoStart: true, autoConnect: true,
                 serverIP, serverPort, signalingUrl, worldName);
