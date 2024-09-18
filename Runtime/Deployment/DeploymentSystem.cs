@@ -775,8 +775,8 @@ namespace PolkaDOTS.Deployment
         {
             Debug.Log(request);
 
-            var worldName = request.role;
-            var worldToStopStr = worldName == "ClientWorld" ? "StreamingGuestWorld" : "ClientWorld";
+            var worldToStartStr = request.role;
+            var worldToStopStr = worldToStartStr == "ClientWorld" ? "StreamingGuestWorld" : "ClientWorld";
             // Translate Hostname to IP address immediately because most of the code cannot handle hostnames
             // TODO error handling
             var serverIP = request.ipv4;
@@ -790,14 +790,14 @@ namespace PolkaDOTS.Deployment
 
             MultiplayStreamingRoles msr;
 
-            if (worldName == "StreamingGuestWorld")
+            if (worldToStartStr == "StreamingGuestWorld")
             {
                 msr = MultiplayStreamingRoles.Guest;
                 // All your config are belong to us!
                 ApplicationConfig.SignalingUrl.Value = signalingUrl;
                 ApplicationConfig.IceServerUrls.Value = iceUrls;
             }
-            else if (worldName == "ClientWorld")
+            else if (worldToStartStr == "ClientWorld")
             {
                 msr = MultiplayStreamingRoles.Disabled;
             }
@@ -814,7 +814,7 @@ namespace PolkaDOTS.Deployment
             // Create, start, and connect a new world
             var bootstrap = BootstrapInstance.instance;
             bootstrap.SetupWorlds(msr, GameBootstrap.BootstrapPlayTypes.Client, ref worlds, numSimulatedClients, autoStart: true, autoConnect: true,
-                serverIP, serverPort, signalingUrl, worldName);
+                serverIP, serverPort, signalingUrl, worldToStartStr);
             DeploymentReceiveSystem.GenerateAuthoringSceneLoadRequests(commandBuffer, ref worlds);
             commandBuffer.Playback(EntityManager);
         }
