@@ -50,7 +50,7 @@ namespace PolkaDOTS
                         multiplay.StopMultiplay();
                     }
                     // Stop emulation
-                    Emulation.Emulation emulation = EmulationSingleton.Instance;
+                    var emulation = EmulationSingleton.Instance;
                     if (emulation != null)
                     {
                         emulation.Pause();

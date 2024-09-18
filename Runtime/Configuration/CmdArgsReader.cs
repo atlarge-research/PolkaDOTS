@@ -63,16 +63,16 @@ namespace PolkaDOTS.Configuration
             if (ApplicationConfig.PlayType != GameBootstrap.BootstrapPlayTypes.StreamedClient &&
                 ApplicationConfig.PlayType != GameBootstrap.BootstrapPlayTypes.SimulatedClient)
             {
-                ApplicationConfig.PlayType.SetValue((GameBootstrap.BootstrapPlayTypes)editorPlayType);
+                ApplicationConfig.PlayType.Value = (GameBootstrap.BootstrapPlayTypes)editorPlayType;
             }
             // Server address
             var editorServerAddress = EditorPrefs.GetString(s_AutoConnectionAddressKey, "127.0.0.1");
-            ApplicationConfig.ServerUrl.SetValue(editorServerAddress);
+            ApplicationConfig.ServerUrl.Value = editorServerAddress;
             //Server port
             var editorServerPort = EditorPrefs.GetInt(s_AutoConnectionPortKey, 7979);
             if (editorServerPort != 0)
             {
-                ApplicationConfig.ServerPort.SetValue(editorServerPort);
+                ApplicationConfig.ServerPort.Value = editorServerPort;
             }
 #endif
 
@@ -95,7 +95,7 @@ namespace PolkaDOTS.Configuration
                 else
                 {
                     //Use Newtonsoft JSON parsing to support enum serialization to/from string
-                    ApplicationConfig.ImportDeploymentConfig.SetValue(JsonConvert.DeserializeObject<JsonDeploymentConfig>(editorArgs.deploymentConfig));
+                    ApplicationConfig.ImportDeploymentConfig.Value = JsonConvert.DeserializeObject<JsonDeploymentConfig>(editorArgs.deploymentConfig);
                 }
             }
 #endif
@@ -104,14 +104,14 @@ namespace PolkaDOTS.Configuration
             if (ApplicationConfig.GetRemoteConfig && ApplicationConfig.DeploymentID == -1)
             {
                 Debug.Log($"Remote config flag set with no deployment ID provided, using 0!");
-                ApplicationConfig.DeploymentID.SetValue(0);
+                ApplicationConfig.DeploymentID.Value = 0;
             }
 
             if (ApplicationConfig.PlayType == GameBootstrap.BootstrapPlayTypes.Server &&
                 ApplicationConfig.MultiplayStreamingRole != MultiplayStreamingRoles.Disabled)
             {
                 Debug.Log("Cannot run Multiplay streaming on Server, disabling Multiplay!");
-                ApplicationConfig.MultiplayStreamingRole.SetValue(MultiplayStreamingRoles.Disabled);
+                ApplicationConfig.MultiplayStreamingRole.Value = MultiplayStreamingRoles.Disabled;
             }
 
             return true;

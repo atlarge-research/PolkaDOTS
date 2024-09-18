@@ -17,7 +17,7 @@ namespace PolkaDOTS.Multiplay
         public FixedString512Bytes url;
     }
 
-    
+
     // ECS System wrapper around Multiplay class that handles render streaming connections
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation)]
     [UpdateInGroup(typeof(InitializationSystemGroup))]
@@ -33,19 +33,20 @@ namespace PolkaDOTS.Multiplay
                 .WithAll<NetworkId, NetworkStreamInGame>();
             _connQuery = GetEntityQuery(builder);
             initialized = false;
-            
+
             if (World.Unmanaged.IsSimulatedClient())
+            {
                 Enabled = false;
-            
-            
+            }
         }
-        
+
         protected override void OnUpdate()
         {
-            Multiplay multiplay = MultiplaySingleton.Instance;
-            if (multiplay is null)
+            var multiplay = MultiplaySingleton.Instance;
+            if (multiplay == null)
+            {
                 return;
-
+            }
 
             if (World.Unmanaged.IsStreamedClient())
             {
@@ -53,8 +54,11 @@ namespace PolkaDOTS.Multiplay
                 if (!_requestQuery.IsEmpty)
                 {
                     var requests = _requestQuery.ToComponentDataArray<StreamedClientRequestConnect>(Allocator.Temp);
-                    if(requests.Length > 1)
+                    if (requests.Length > 1)
+                    {
                         Debug.Log($"Render streaming guest has multiple connection requests! Ignoring all but the first...");
+                    }
+
                     multiplay.SetUpGuest(requests[0].url.ToString());
                     EntityManager.DestroyEntity(_requestQuery);
                 }
@@ -85,8 +89,6 @@ namespace PolkaDOTS.Multiplay
                     }
                 }
             }
-            
         }
-
     }
 }

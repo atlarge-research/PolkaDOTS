@@ -185,7 +185,7 @@ namespace PolkaDOTS.Bootstrap
 
             // ================== SETUP WORLDS ==================
 
-            ApplicationConfig.MultiplayStreamingRole.SetValue(mRole);
+            ApplicationConfig.MultiplayStreamingRole.Value = mRole;
 
 
             if (playTypes == BootstrapPlayTypes.StreamedClient)

@@ -173,7 +173,9 @@ namespace PolkaDOTS.Multiplay
         {
             // Cloud only hosts do not run a local player
             if (!cloudOnly)
+            {
                 SetUpLocalPlayer();
+            }
 
             if (!settings.MultiplayEnabled)
             {
@@ -218,10 +220,8 @@ namespace PolkaDOTS.Multiplay
 
             renderStreaming.useDefaultSettings = false;
             renderStreaming.SetSignalingSettings(settings.SignalingSettings);
-            Debug.Log($"[{DateTime.Now.TimeOfDay.ToString()}] Setting up multiplay guest with signaling at {settings.SignalingAddress}");
+            Debug.Log($"[{DateTime.Now.TimeOfDay}] Setting up multiplay guest with signaling at {settings.SignalingAddress}");
             renderStreaming.Run(handlers: new SignalingHandlerBase[] { handler });
-
-
 
             // Enable the video output
             videoImage.gameObject.SetActive(true);
@@ -229,7 +229,9 @@ namespace PolkaDOTS.Multiplay
             receiveVideoViewer.OnUpdateReceiveTexture += texture => videoImage.texture = texture;
 
             if (settings != null)
+            {
                 receiveVideoViewer.SetCodec(settings.ReceiverVideoCodec);
+            }
 
             Cursor.lockState = CursorLockMode.Locked;
 

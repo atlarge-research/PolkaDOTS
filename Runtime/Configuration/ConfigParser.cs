@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -35,14 +36,17 @@ namespace PolkaDOTS.Configuration
             /// <summary>
             ///
             /// </summary>
-            public T Value => m_value;
-
-            /// <summary>
-            ///
-            /// </summary>
-            public void SetValue(T val)
+            public T Value
             {
-                m_value = val;
+                get { return m_value; }
+                set
+                {
+                    if (m_defined)
+                    {
+                        Debug.LogWarning($"Overwriting argument {ArgumentName}: was {m_value}, is {value}");
+                    }
+                    m_value = value;
+                }
             }
 
             /// <summary>
@@ -113,6 +117,12 @@ namespace PolkaDOTS.Configuration
             public StringArrayArgument(string argumentName, string[] defaultVal, bool required = false) : base(argumentName, defaultVal, required) { }
 
             public static implicit operator string[](StringArrayArgument argument) => argument.Value;
+
+            public override string ToString()
+            {
+                var s = string.Join(",", m_value);
+                return $"[{s}]";
+            }
         }
 
 

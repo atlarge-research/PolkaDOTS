@@ -1,18 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using PolkaDOTS.Bootstrap;
 using PolkaDOTS.Multiplay;
-using Unity.Assertions;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
 using Unity.Networking.Transport;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 
 namespace PolkaDOTS.Deployment
@@ -689,10 +686,12 @@ namespace PolkaDOTS.Deployment
             public ushort port;
             public ushort numberOfClients = 1;
             public string signalingUrl = "ws://127.0.0.1:7981";
+            public string[] iceUrls = new string[] { "stun:stun.l.google.com:19302" };
 
             public override string ToString()
             {
-                return $"role={role},addr={ipv4}:{port},numberOfClients={numberOfClients},signalingUrl={signalingUrl}";
+                var iceUrlsString = string.Join(",", iceUrls);
+                return $"role={role},addr={ipv4}:{port},numberOfClients={numberOfClients},signalingUrl={signalingUrl},iceUrls=[{iceUrlsString}]";
             }
         }
 
@@ -776,39 +775,49 @@ namespace PolkaDOTS.Deployment
         {
             Debug.Log(request);
 
-            var role = request.role;
+            var worldName = request.role;
+            var worldToStop = worldName == "ClientWorld" ? "StreamingGuestWorld" : "ClientWorld";
             // Translate Hostname to IP address immediately because most of the code cannot handle hostnames
             // TODO error handling
             var serverIP = request.ipv4;
             var serverPort = request.port;
             var numSimulatedClients = request.numberOfClients;
             var signalingUrl = request.signalingUrl;
+            var iceUrls = request.iceUrls;
 
             var commandBuffer = new EntityCommandBuffer(Allocator.Temp);
             var worlds = new NativeList<WorldUnmanaged>(16, Allocator.Temp);
-            var worldName = role;
+
+            MultiplayStreamingRoles msr;
 
             // TODO check our current role and server we're connected to
-            if (role == "thinClient")
+            if (worldName == "StreamingGuestWorld")
             {
+                msr = MultiplayStreamingRoles.Guest;
+                // All your config are belong to us!
+                ApplicationConfig.SignalingUrl.Value = signalingUrl;
+                ApplicationConfig.IceServerUrls.Value = iceUrls;
             }
-            else if (role == "client")
+            else if (worldName == "ClientWorld")
             {
-                // Stop the running thin client world
-                var thinClientWorld = BootstrapInstance.instance.worlds.Find(w => w.Name == "StreamingGuestWorld");
-                DeploymentConfigHelpers.HandleWorldAction(thinClientWorld, null, 0, WorldAction.Stop);
-
-                // Create, start, and connect a regular client world
-                var bootstrap = BootstrapInstance.instance;
-                bootstrap.SetupWorlds(MultiplayStreamingRoles.Disabled, GameBootstrap.BootstrapPlayTypes.Client,
-                    ref worlds, numSimulatedClients, autoStart: true, autoConnect: true, serverIP, serverPort, signalingUrl, worldName);
-                DeploymentReceiveSystem.GenerateAuthoringSceneLoadRequests(commandBuffer, ref worlds);
-                commandBuffer.Playback(EntityManager);
+                msr = MultiplayStreamingRoles.Disabled;
             }
             else
             {
                 Debug.LogWarning($"Unknown remote deployment request role: {request.role}");
+                return;
             }
+
+            // Stop the running thin client world
+            var thinClientWorld = BootstrapInstance.instance.worlds.Find(w => w.Name == worldToStop);
+            DeploymentConfigHelpers.HandleWorldAction(thinClientWorld, null, 0, WorldAction.Stop);
+
+            // Create, start, and connect a regular client world
+            var bootstrap = BootstrapInstance.instance;
+            bootstrap.SetupWorlds(msr, GameBootstrap.BootstrapPlayTypes.Client, ref worlds, numSimulatedClients, autoStart: true, autoConnect: true,
+                serverIP, serverPort, signalingUrl, worldName);
+            DeploymentReceiveSystem.GenerateAuthoringSceneLoadRequests(commandBuffer, ref worlds);
+            commandBuffer.Playback(EntityManager);
         }
     }
 }

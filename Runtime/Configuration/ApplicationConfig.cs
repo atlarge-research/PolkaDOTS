@@ -45,9 +45,10 @@ namespace PolkaDOTS
         // ================== MULTIPLAY ==================
         public static readonly CommandLineParser.EnumArgument<MultiplayStreamingRoles> MultiplayStreamingRole = new CommandLineParser.EnumArgument<MultiplayStreamingRoles>("-multiplayRole", MultiplayStreamingRoles.Disabled);
         public static readonly CommandLineParser.StringArgument SignalingUrl = new CommandLineParser.StringArgument("-signalingUrl", "ws://127.0.0.1:7981");
+
         // We only use WebSocket signaling TODO If necessary add support for ICE servers
         //internal static readonly CommandLineParser.StringArgument SignalingType = new CommandLineParser.StringArgument("-signalingType");
-        //internal static readonly CommandLineParser.StringArrayArgument IceServerUrls = new CommandLineParser.StringArrayArgument("-iceServerUrl");
+        public static readonly CommandLineParser.StringArrayArgument IceServerUrls = new CommandLineParser.StringArrayArgument("-iceurl", null);
         //internal static readonly CommandLineParser.StringArgument IceServerUsername = new CommandLineParser.StringArgument("-iceServerUsername");
         //internal static readonly CommandLineParser.StringArgument IceServerCredential = new CommandLineParser.StringArgument("-iceServerCredential");
 

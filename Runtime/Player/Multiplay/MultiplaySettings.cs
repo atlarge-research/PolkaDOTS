@@ -22,13 +22,13 @@ namespace PolkaDOTS.Multiplay
         public SignalingType SignalingType { get; set; } = SignalingType.WebSocket;
 
         public string SignalingAddress { get; set; } = "127.0.0.1";
-        
+
         public bool SignalingSecured { get; set; } = false;
 
         public int SignalingInterval { get; set; } = 5000;
 
         public SignalingSettings SignalingSettings;
-        
+
         public Vector2Int StreamSize { get; set; } = new Vector2Int(DefaultStreamWidth, DefaultStreamHeight);
 
         public VideoCodecInfo ReceiverVideoCodec { get; set; } = null;
@@ -49,32 +49,35 @@ namespace PolkaDOTS.Multiplay
 
         public void Initialize()
         {
-            if (Settings != null) return;
-            Settings = new MultiplaySettings();
-            
-            Settings.SignalingAddress = ApplicationConfig.SignalingUrl;
+            if (Settings != null)
+            {
+                return;
+            }
 
-            Settings.SignalingSettings = new WebSocketSignalingSettings
-            (
-                url: ApplicationConfig.SignalingUrl
-            );
-            
+            Settings = new MultiplaySettings
+            {
+                SignalingAddress = ApplicationConfig.SignalingUrl,
+                SignalingSettings = new WebSocketSignalingSettings(url: ApplicationConfig.SignalingUrl, iceServers: ApplicationConfig.IceServerUrls.Value),
+            };
+
             var codecs = VideoStreamReceiver.GetAvailableCodecs();
-            bool h264NotFound = true;
+            var h264NotFound = true;
             VideoCodecInfo chosenCodec = null;
-            foreach(var codec in codecs)
+            foreach (var codec in codecs)
             {
                 if (codec.name == "AV1")
                 {
-                    AV1CodecInfo av1 = (AV1CodecInfo) codec;
+                    var av1 = (AV1CodecInfo)codec;
                     Debug.Log($"Found codec: AV1 {av1.profile}");
-                }else if (codec.name == "VP9")
+                }
+                else if (codec.name == "VP9")
                 {
-                    VP9CodecInfo vp9 = (VP9CodecInfo)codec;
+                    var vp9 = (VP9CodecInfo)codec;
                     Debug.Log($"Found codec: VP9 {vp9.profile}");
-                } else if (codec.name == "H264")
+                }
+                else if (codec.name == "H264")
                 {
-                    H264CodecInfo h264 = (H264CodecInfo) codec;
+                    var h264 = (H264CodecInfo)codec;
                     Debug.Log($"Found codec: H264 {h264.profile} {h264.level}");
                     if (h264.profile == H264Profile.High)
                     {
@@ -88,17 +91,22 @@ namespace PolkaDOTS.Multiplay
                 }
                 // Backup codec if we don't find h264.high
                 if (h264NotFound)
+                {
                     chosenCodec = codec;
+                }
             }
-            if(chosenCodec == null){
+            if (chosenCodec == null)
+            {
                 Debug.LogError($"No supported codec types found! Disabling Multiplay");
                 Settings.MultiplayEnabled = false;
             }
-            if(h264NotFound)
+            if (h264NotFound)
+            {
                 Debug.Log($"Could not find H264.High as streaming codec!");
+            }
+
             Settings.ReceiverVideoCodec = chosenCodec;
             Settings.SenderVideoCodec = chosenCodec;
-            
         }
     }
 }
